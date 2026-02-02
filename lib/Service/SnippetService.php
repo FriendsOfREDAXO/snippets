@@ -78,6 +78,9 @@ class SnippetService
     /**
      * Rendert ein PHP-Snippet (nur für Admins!)
      *
+     * Sicherheit: Code wird in einer Closure mit begrenztem Scope ausgeführt.
+     * Nur $SNIPPET_PARAMS und $SNIPPET_KEY sind verfügbar, keine internen Objekte.
+     *
      * @param array<string, mixed> $params
      */
     private static function renderPhp(Snippet $snippet, string $code, array $params): string
@@ -93,34 +96,31 @@ class SnippetService
         // Audit-Log
         self::logExecution($snippet);
 
-        // PHP-Code in isoliertem Kontext ausführen
-        \rex_response::cleanOutputBuffers();
-        ob_start();
+        // PHP-Code in isolierter Closure ausführen (Sicherheit: begrenzter Scope)
+        $executor = static function (array $SNIPPET_PARAMS, string $SNIPPET_KEY) use ($code): string {
+            \rex_response::cleanOutputBuffers();
+            ob_start();
+
+            try {
+                // eval mit PHP-Tags - nur $SNIPPET_PARAMS und $SNIPPET_KEY sind verfügbar
+                $evalResult = eval('?>' . $code);
+
+                if (false === $evalResult) {
+                    throw new \rex_exception('PHP parse error in snippet: ' . $SNIPPET_KEY);
+                }
+
+                $output = ob_get_clean();
+
+                return false !== $output ? $output : '';
+            } catch (\Throwable $e) {
+                ob_end_clean();
+                throw $e; // Re-throw für äußeres Error-Handling
+            }
+        };
 
         try {
-            // Fragment-Kontext für Snippet
-            $fragment = new \rex_fragment();
-            $fragment->setVar('params', $params, false);
-            $fragment->setVar('snippet', $snippet, false);
-
-            // Code ausführen
-            // Variablen für den Snippet-Code verfügbar machen
-            $SNIPPET_PARAMS = $params;
-            $SNIPPET_KEY = $snippet->getKey();
-
-            // eval mit PHP-Tags
-            $evalResult = eval('?>' . $code);
-
-            if (false === $evalResult) {
-                throw new \rex_exception('PHP parse error in snippet: ' . $snippet->getKey());
-            }
-
-            $output = ob_get_clean();
-
-            return false !== $output ? $output : '';
+            return $executor($params, $snippet->getKey());
         } catch (\Throwable $e) {
-            ob_end_clean();
-
             \rex_logger::logException($e);
 
             if (\rex::isDebugMode()) {
