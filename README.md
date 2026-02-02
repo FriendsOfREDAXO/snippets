@@ -10,7 +10,7 @@ Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fr
 - **Filter** – 26+ Filter für Textformatierung
 - **HTML-Ersetzungen** – CSS-Selektoren, Regex und PHP-Callbacks
 - **Abkürzungen** – Automatische `<abbr>`-Tags für Akronyme
-- **Helper-Funktionen** – `snippet()`, `snippet_apply()` für PHP-Zugriff
+- **PHP-API** – `Snippets::get()`, `Snippets::apply()` für PHP-Zugriff
 - **Scope-Kontrolle** – Templates, Kategorien, URLs, Backend-Seiten
 - **Berechtigungssystem** – Admin, Editor, Viewer Rollen
 
@@ -226,7 +226,7 @@ Filter formatieren die Snippet-Ausgabe. Sie werden mit `|` notiert und können k
 
 ## PHP-API
 
-### Snippets-Klasse (empfohlen)
+### Snippets-Klasse
 
 Die zentrale API-Klasse für den Zugriff auf Snippets.
 
@@ -257,83 +257,16 @@ echo Snippets::getOr('headline', 'Willkommen');
 echo Snippets::filter($content, 'escape|truncate(100)');
 ```
 
-### Legacy-Funktionen
+### Methoden-Übersicht
 
-Globale PHP-Funktionen (für Abwärtskompatibilität).
-
-### snippet()
-
-Rendert ein einzelnes Snippet.
-
-```php
-// Einfach
-echo snippet('footer_text');
-
-// Mit Parametern
-echo snippet('greeting', ['name' => 'Max', 'company' => 'ACME']);
-
-// Für andere Sprache (clang_id = 2)
-echo snippet('headline', [], 2);
-
-// Im Backend-Context
-echo snippet('admin_notice', [], null, 'backend');
-```
-
-### snippet_apply()
-
-Ersetzt alle Snippet-Platzhalter in einem Text.
-
-```php
-$html = '<h1>[[snippet:headline]]</h1><p>[[snippet:intro|upper]]</p>';
-echo snippet_apply($html);
-
-// E-Mail-Template laden und Snippets ersetzen
-$template = rex_file::get(rex_path::addon('myAddon', 'templates/mail.html'));
-echo snippet_apply($template);
-```
-
-### snippet_filtered()
-
-Rendert ein Snippet mit Filtern.
-
-```php
-// Mit einzelnem Filter
-echo snippet_filtered('headline', [], 'upper');
-
-// Mit mehreren Filtern
-echo snippet_filtered('description', [], ['truncate(100)', 'strip_tags']);
-
-// Als Pipe-String
-echo snippet_filtered('content', [], 'markdown|sanitize');
-```
-
-### snippet_exists()
-
-Prüft ob ein Snippet existiert und aktiv ist.
-
-```php
-if (snippet_exists('special_offer')) {
-    echo snippet('special_offer');
-}
-```
-
-### snippet_or()
-
-Gibt ein Snippet zurück oder einen Fallback-Wert.
-
-```php
-echo snippet_or('headline', 'Willkommen');
-echo snippet_or('greeting', 'Hallo!', ['name' => 'Gast']);
-```
-
-### snippet_filter()
-
-Wendet Filter auf beliebigen Text an.
-
-```php
-echo snippet_filter($userInput, 'escape|truncate(100)');
-echo snippet_filter($content, ['markdown', 'sanitize']);
-```
+| Methode | Beschreibung |
+|---------|--------------|
+| `Snippets::get($key, $params, $clangId)` | Snippet abrufen |
+| `Snippets::filtered($key, $params, $filters, $clangId)` | Snippet mit Filtern |
+| `Snippets::apply($text, $clangId, $context)` | Platzhalter ersetzen |
+| `Snippets::exists($key)` | Existenz prüfen |
+| `Snippets::getOr($key, $fallback, $params, $clangId)` | Mit Fallback |
+| `Snippets::filter($content, $filters)` | Text filtern |
 
 ---
 

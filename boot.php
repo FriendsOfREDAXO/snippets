@@ -11,9 +11,6 @@ use FriendsOfREDAXO\Snippets\Service\HtmlReplacementService;
 use FriendsOfREDAXO\Snippets\Service\AbbreviationService;
 use FriendsOfREDAXO\Snippets\Util\ContextDetector;
 
-// Helper-Funktionen laden
-require_once __DIR__ . '/functions/snippets.php';
-
 // Berechtigungen registrieren
 if (rex::isBackend() && null !== rex::getUser()) {
     rex_perm::register('snippets[admin]', rex_i18n::msg('perm_general_snippets[admin]'));
