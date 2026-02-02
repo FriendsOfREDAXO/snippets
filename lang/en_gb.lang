@@ -262,3 +262,32 @@ context_frontend = Frontend
 context_backend = Backend
 status_active = Active
 status_inactive = Inactive
+
+# Import/Export
+snippets_import_export = Import/Export
+export_title = Export Data
+export_description = Export snippets, HTML replacements or abbreviations as JSON file.
+export_panel_title = Export
+export_type_snippets = Snippets
+export_type_html_replacements = HTML Replacements
+export_type_abbreviations = Abbreviations
+export_button = Export
+
+import_title = Import Data
+import_description = Import previously exported JSON files.
+import_panel_title = Import
+import_file = Select JSON file
+import_file_help = Select a previously exported JSON file.
+import_overwrite = Overwrite existing entries
+import_overwrite_help = If enabled, existing entries with the same key/name will be overwritten. Otherwise they will be skipped.
+import_button = Import
+import_success = Import successful: {0} imported, {1} skipped.
+import_error_file_too_large = The file is too large.
+import_error_no_file = Please select a file.
+import_error_upload = Error uploading the file.
+import_error_read = Could not read the file.
+
+import_export_info_panel = Information
+import_export_info_title = Import/Export Notes
+import_export_info_text = Export creates a JSON file with all entries of the selected area. Import restores the data. Note that imported data may have the same key/name as existing entries.
+import_export_format_title = JSON Format

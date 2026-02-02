@@ -8,9 +8,17 @@
 
 use FriendsOfREDAXO\Snippets\Domain\Abbreviation;
 use FriendsOfREDAXO\Snippets\Repository\AbbreviationRepository;
+use FriendsOfREDAXO\Snippets\Service\PermissionService;
 
 $addon = rex_addon::get('snippets');
 
+// Berechtigungsprüfung
+if (!PermissionService::canEdit()) {
+    echo rex_view::error(rex_i18n::msg('no_rights'));
+    return;
+}
+
+$csrfToken = rex_csrf_token::factory('snippets_abbreviation_edit');
 $id = rex_request('id', 'int', 0);
 
 $abbreviation = null;
@@ -18,14 +26,14 @@ $abbreviation = null;
 // Bearbeiten: Vorhandene Abbreviation laden
 if ($id > 0) {
     $abbreviation = AbbreviationRepository::findById($id);
-    if (!$abbreviation) {
+    if (null === $abbreviation) {
         echo rex_view::error($addon->i18n('abbreviation_not_found'));
         return;
     }
 }
 
 // Neu anlegen
-if (!$abbreviation) {
+if (null === $abbreviation) {
     $abbreviation = Abbreviation::fromArray([
         'id' => 0,
         'abbr' => '',
@@ -44,12 +52,15 @@ if (!$abbreviation) {
 }
 
 // Formular absenden
-if (rex_post('save', 'string') === '1' && $abbreviation) {
-    $data = [
+if ('1' === rex_post('save', 'string')) {
+    if (!$csrfToken->isValid()) {
+        echo rex_view::error(rex_i18n::msg('csrf_token_invalid'));
+    } else {
+        $data = [
         'abbr' => rex_post('abbr', 'string', ''),
         'title' => rex_post('title', 'string', ''),
         'description' => rex_post('description', 'string', ''),
-        'language' => rex_post('language', 'int', 0),
+        'language' => rex_post('language', 'int', 0) > 0 ? rex_post('language', 'int', 0) : null,
         'case_sensitive' => rex_post('case_sensitive', 'bool', false),
         'whole_word' => rex_post('whole_word', 'bool', false),
         'scope_context' => rex_post('scope_context', 'string', Abbreviation::CONTEXT_FRONTEND),
@@ -72,11 +83,11 @@ if (rex_post('save', 'string') === '1' && $abbreviation) {
         $errors[] = $addon->i18n('abbreviation_error_title_empty');
     }
     
-    // Prüfen auf Duplikat
+    // Prüfen auf Duplikat (0 als null interpretieren für die Suche)
     $existingId = AbbreviationRepository::exists(
         $data['abbr'],
         $data['language'],
-        $id
+        $id > 0 ? $id : null
     );
     
     if ($existingId > 0) {
@@ -89,19 +100,18 @@ if (rex_post('save', 'string') === '1' && $abbreviation) {
             echo rex_view::success($addon->i18n('abbreviation_saved'));
             
             // Redirect zur Übersicht
-            header('Location: ' . rex_url::backendPage('snippets/abbreviations/overview'));
-            exit;
+            rex_response::sendRedirect(rex_url::backendPage('snippets/abbreviations/overview'));
         } else {
             echo rex_view::error($addon->i18n('abbreviation_save_failed'));
         }
     } else {
         echo rex_view::error(implode('<br>', $errors));
     }
+    } // Ende CSRF-Validierung
 }
 
 // Formular anzeigen
-if ($abbreviation) {
-    $formElements = [];
+$formElements = [];
     
     // Abkürzung
     $formElements[] = [
@@ -164,7 +174,7 @@ if ($abbreviation) {
     // Priorität
     $formElements[] = [
         'label' => '<label for="priority">' . $addon->i18n('abbreviation_priority') . '</label>',
-        'field' => '<input type="number" class="form-control" id="priority" name="priority" value="' . (int) $abbreviation->getPriority() . '" min="0" max="100">
+        'field' => '<input type="number" class="form-control" id="priority" name="priority" value="' . $abbreviation->getPriority() . '" min="0" max="100">
                     <p class="help-block">' . $addon->i18n('abbreviation_priority_info') . '</p>',
     ];
     
@@ -198,6 +208,7 @@ if ($abbreviation) {
     echo '<div class="panel-body">';
     echo '<form action="' . rex_url::currentBackendPage(['id' => $id]) . '" method="post">';
     echo '<input type="hidden" name="save" value="1">';
+    echo $csrfToken->getHiddenField();
     
     echo '<fieldset>';
     foreach ($formElements as $element) {
@@ -225,4 +236,3 @@ if ($abbreviation) {
     echo '</div>';
     echo '</div>';
     echo '</section>';
-}

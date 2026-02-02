@@ -8,8 +8,16 @@
 
 use FriendsOfREDAXO\Snippets\Domain\HtmlReplacement;
 use FriendsOfREDAXO\Snippets\Repository\HtmlReplacementRepository;
+use FriendsOfREDAXO\Snippets\Service\PermissionService;
 
 $addon = rex_addon::get('snippets');
+
+// Berechtigungsprüfung
+if (!PermissionService::canEdit()) {
+    echo rex_view::error(rex_i18n::msg('no_rights'));
+    return;
+}
+
 $csrf = rex_csrf_token::factory('snippets_html_replacement_edit');
 
 $id = rex_request::get('id', 'int', 0);
@@ -64,7 +72,7 @@ if (rex_post('save', 'boolean') || rex_post('save_and_close', 'boolean')) {
 
         // Regex-Validierung
         if (HtmlReplacement::TYPE_REGEX === $type) {
-            set_error_handler(static function() {});
+            set_error_handler(static function(): bool { return true; });
             $isValidRegex = false !== @preg_match($searchValue, '');
             restore_error_handler();
             
@@ -82,9 +90,9 @@ if (rex_post('save', 'boolean') || rex_post('save_and_close', 'boolean')) {
                 'replacement' => $replacementContent,
                 'position' => $position,
                 'scope_context' => $scopeContext,
-                'scope_templates' => array_filter($scopeTemplates),
-                'scope_backend_pages' => array_filter($scopeBackendPages),
-                'scope_categories' => array_filter($scopeCategories),
+                'scope_templates' => array_values(array_filter($scopeTemplates, static fn($v): bool => '' !== $v && null !== $v)),
+                'scope_backend_pages' => array_values(array_filter($scopeBackendPages, static fn($v): bool => '' !== $v && null !== $v)),
+                'scope_categories' => array_values(array_filter($scopeCategories, static fn($v): bool => '' !== $v && null !== $v)),
                 'scope_url_pattern' => $scopeUrlPattern,
                 'priority' => $priority,
                 'status' => $status ? 1 : 0,
@@ -97,8 +105,7 @@ if (rex_post('save', 'boolean') || rex_post('save_and_close', 'boolean')) {
             $savedId = HtmlReplacementRepository::save($data);
 
             if (rex_post('save_and_close', 'boolean')) {
-                header('Location: ' . rex_url::currentBackendPage(['page' => 'snippets/html_replacement']));
-                exit;
+                rex_response::sendRedirect(rex_url::currentBackendPage(['page' => 'snippets/html_replacement']));
             }
 
             echo rex_view::success($addon->i18n('snippets_html_replacement_saved'));

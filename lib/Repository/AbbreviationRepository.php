@@ -217,21 +217,36 @@ class AbbreviationRepository
     }
 
     /**
-     * Prüft ob Abkürzung bereits existiert
+     * Prüft ob Abkürzung bereits existiert und gibt deren ID zurück
+     *
+     * @param string $abbr Die Abkürzung
+     * @param int|null $language Sprache (0 oder null = alle Sprachen)
+     * @param int|null $excludeId ID zum Ausschließen (für Updates)
+     * @return int 0 wenn nicht existiert, ansonsten die ID
      */
-    public static function exists(string $abbr, ?int $excludeId = null): bool
+    public static function exists(string $abbr, ?int $language = null, ?int $excludeId = null): int
     {
         $sql = rex_sql::factory();
-        $query = 'SELECT COUNT(*) as count FROM ' . rex::getTable('snippets_abbreviation') . ' WHERE abbr = ?';
+        $query = 'SELECT id FROM ' . rex::getTable('snippets_abbreviation') . ' WHERE abbr = ?';
         $params = [$abbr];
-        
-        if (null !== $excludeId) {
+
+        // Sprachprüfung: Entweder gleiche Sprache oder global (null/0)
+        if (null !== $language && $language > 0) {
+            $query .= ' AND (language = ? OR language IS NULL OR language = 0)';
+            $params[] = $language;
+        }
+
+        if (null !== $excludeId && $excludeId > 0) {
             $query .= ' AND id != ?';
             $params[] = $excludeId;
         }
-        
+
         $sql->setQuery($query, $params);
-        
-        return $sql->getValue('count') > 0;
+
+        if ($sql->getRows() > 0) {
+            return (int) $sql->getValue('id');
+        }
+
+        return 0;
     }
 }

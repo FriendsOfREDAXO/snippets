@@ -27,7 +27,7 @@ if ('save' === $func) {
         $icon = rex_request::post('icon', 'string');
         $sortOrder = rex_request::post('sort_order', 'int', 0);
 
-        if (empty($name)) {
+        if ('' === $name) {
             echo rex_view::error(rex_i18n::msg('snippets_category_name') . ': ' . rex_i18n::msg('snippets_required'));
         } else {
             $sql = rex_sql::factory();
@@ -80,9 +80,9 @@ if ($id > 0 && in_array($func, ['edit', 'save'], true)) {
 
 // Formular anzeigen
 if (in_array($func, ['add', 'edit'], true)) {
-    $name = $category ? ($category['name'] ?? '') : '';
-    $icon = $category ? ($category['icon'] ?? '') : '';
-    $sortOrder = $category ? (int) ($category['sort_order'] ?? 0) : 0;
+    $name = is_array($category) && isset($category['name']) ? (string) $category['name'] : '';
+    $icon = is_array($category) && isset($category['icon']) ? (string) $category['icon'] : '';
+    $sortOrder = is_array($category) && isset($category['sort_order']) ? (int) $category['sort_order'] : 0;
 
     $formTitle = 'add' === $func ? rex_i18n::msg('snippets_category_add') : rex_i18n::msg('edit');
 
@@ -156,15 +156,16 @@ if (0 === $sql->getRows()) {
 } else {
     for ($i = 0; $i < $sql->getRows(); ++$i) {
         $catId = (int) $sql->getValue('id');
-        $catName = rex_escape($sql->getValue('name'));
-        $catIcon = rex_escape($sql->getValue('icon'));
+        $catName = rex_escape((string) $sql->getValue('name'));
+        $catIcon = (string) $sql->getValue('icon');
         $catSort = (int) $sql->getValue('sort_order');
+        $hasIcon = '' !== $catIcon;
 
         $listContent .= '
         <tr>
             <td>' . $catId . '</td>
             <td>' . $catName . '</td>
-            <td>' . ($catIcon ? '<i class="rex-icon ' . $catIcon . '"></i> ' . $catIcon : '-') . '</td>
+            <td>' . ($hasIcon ? '<i class="rex-icon ' . rex_escape($catIcon) . '"></i> ' . rex_escape($catIcon) : '-') . '</td>
             <td>' . $catSort . '</td>
             <td>
                 <a href="' . rex_url::currentBackendPage(['func' => 'edit', 'id' => $catId]) . '" class="btn btn-xs btn-default">

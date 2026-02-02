@@ -40,19 +40,19 @@ if ('save' === $func) {
         $errors = [];
 
         // Validierung
-        if (empty($key)) {
+        if ('' === $key) {
             $errors[] = rex_i18n::msg('snippets_form_key') . ': ' . rex_i18n::msg('snippets_required');
         } elseif (!Parser::isValidKey($key)) {
             $errors[] = rex_i18n::msg('snippets_error_invalid_key');
         }
 
-        if (empty($title)) {
+        if ('' === $title) {
             $errors[] = rex_i18n::msg('snippets_form_title') . ': ' . rex_i18n::msg('snippets_required');
         }
 
         // Key-Eindeutigkeit prüfen
         $existingSnippet = SnippetRepository::getByKey($key);
-        if ($existingSnippet && (!$id || $existingSnippet->getId() !== $id)) {
+        if (null !== $existingSnippet && (0 === $id || $existingSnippet->getId() !== $id)) {
             $errors[] = rex_i18n::msg('snippets_error_key_exists');
         }
 
@@ -61,7 +61,7 @@ if ('save' === $func) {
             $errors[] = rex_i18n::msg('snippets_error_php_permission');
         }
 
-        if (empty($errors)) {
+        if ([] === $errors) {
             $data = [
                 'key_name' => $key,
                 'title' => $title,
@@ -89,7 +89,6 @@ if ('save' === $func) {
                 // Zurück zur Übersicht oder weiter bearbeiten
                 if (rex_request::post('save_and_close', 'bool')) {
                     rex_response::sendRedirect(rex_url::backendPage('snippets/overview'));
-                    exit; // Wichtig: Ausführung beenden nach Redirect!
                 }
 
                 $id = $savedId;
@@ -99,7 +98,7 @@ if ('save' === $func) {
             }
         }
 
-        if (!empty($errors)) {
+        if ([] !== $errors) {
             echo rex_view::error(implode('<br>', $errors));
         }
     }
@@ -121,7 +120,7 @@ if ('save' === $func) {
 $snippet = null;
 if ('edit' === $func && $id > 0) {
     $snippet = SnippetRepository::getById($id);
-    if (!$snippet) {
+    if (null === $snippet) {
         echo rex_view::error(rex_i18n::msg('snippet_not_found'));
         return;
     }
@@ -138,12 +137,15 @@ $sql = rex_sql::factory();
 $sql->setQuery('SELECT * FROM ' . rex::getTable('snippets_category') . ' ORDER BY sort_order, name');
 $categories = [];
 for ($i = 0; $i < $sql->getRows(); ++$i) {
-    $categories[$sql->getValue('id')] = $sql->getValue('name');
+    $catId = $sql->getValue('id');
+    if (is_scalar($catId)) {
+        $categories[(int) $catId] = (string) $sql->getValue('name');
+    }
     $sql->next();
 }
 
 // Wenn Snippet geladen und mehrsprachig, zeige Tabs
-if ($snippet && $snippet->isMultilang() && $id > 0) {
+if (null !== $snippet && $snippet->isMultilang() && $id > 0) {
     // Tab-Navigation
     $currentTab = rex_request::get('tab', 'string', 'main');
     

@@ -95,7 +95,7 @@ if ([] !== $replacements) {
     $content .= '<tbody>';
 
     foreach ($replacements as $replacement) {
-        $id = $replacement->getId();
+        $replacementId = $replacement->getId();
         
         // Status-Icon
         $statusIcon = $replacement->isActive() 
@@ -120,29 +120,30 @@ if ([] !== $replacements) {
             default => $replacement->getScopeContext(),
         };
         
-        if ($replacement->getScopeTemplates()) {
+        if (null !== $replacement->getScopeTemplates() && [] !== $replacement->getScopeTemplates()) {
             $scopeInfo[] = count($replacement->getScopeTemplates()) . ' Template(s)';
         }
-        if ($replacement->getScopeCategories()) {
+        if (null !== $replacement->getScopeCategories() && [] !== $replacement->getScopeCategories()) {
             $scopeInfo[] = count($replacement->getScopeCategories()) . ' Kategorie(n)';
         }
-        if ($replacement->getScopeBackendPages()) {
+        if (null !== $replacement->getScopeBackendPages() && [] !== $replacement->getScopeBackendPages()) {
             $scopeInfo[] = count($replacement->getScopeBackendPages()) . ' Backend-Seite(n)';
         }
         
         $scopeDisplay = implode(' • ', $scopeInfo);
 
         // URLs
-        $editUrl = rex_url::currentBackendPage(['page' => 'snippets/html_replacement/edit', 'id' => $id]);
-        $toggleUrl = rex_url::currentBackendPage(['func' => 'toggle', 'id' => $id] + $csrf->getUrlParams());
-        $deleteUrl = rex_url::currentBackendPage(['func' => 'delete', 'id' => $id] + $csrf->getUrlParams());
+        $editUrl = rex_url::currentBackendPage(['page' => 'snippets/html_replacement/edit', 'id' => $replacementId]);
+        $toggleUrl = rex_url::currentBackendPage(['func' => 'toggle', 'id' => $replacementId] + $csrf->getUrlParams());
+        $deleteUrl = rex_url::currentBackendPage(['func' => 'delete', 'id' => $replacementId] + $csrf->getUrlParams());
 
         $content .= '<tr>';
         $content .= '<td class="rex-table-icon">' . $statusIcon . '</td>';
         $content .= '<td>';
         $content .= '<strong>' . rex_escape($replacement->getName()) . '</strong>';
-        if ($replacement->getDescription()) {
-            $content .= '<br><small class="text-muted">' . nl2br(rex_escape($replacement->getDescription())) . '</small>';
+        $description = $replacement->getDescription();
+        if (null !== $description && '' !== $description) {
+            $content .= '<br><small class="text-muted">' . nl2br(rex_escape($description)) . '</small>';
         }
         $content .= '</td>';
         $content .= '<td>' . $typeBadge . '</td>';

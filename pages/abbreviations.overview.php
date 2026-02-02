@@ -81,7 +81,7 @@ if ([] === $abbreviations) {
     ';
 } else {
     foreach ($abbreviations as $abbreviation) {
-        $id = $abbreviation->getId();
+        $abbrId = $abbreviation->getId();
         $isActive = $abbreviation->isActive();
         
         // Status Label
@@ -91,8 +91,8 @@ if ([] === $abbreviations) {
         
         // Sprache
         $language = $abbreviation->getLanguage();
-        $languageLabel = $language > 0 
-            ? rex_clang::get($language)?->getName() ?? $addon->i18n('abbreviation_language_all')
+        $languageLabel = null !== $language && $language > 0
+            ? (rex_clang::get($language)?->getName() ?? $addon->i18n('abbreviation_language_all'))
             : $addon->i18n('abbreviation_language_all');
         
         // Optionen
@@ -103,7 +103,7 @@ if ([] === $abbreviations) {
         if ($abbreviation->isWholeWord()) {
             $options[] = $addon->i18n('abbreviation_whole_word');
         }
-        $optionsStr = implode(', ', $options) ?: '-';
+        $optionsStr = [] !== $options ? implode(', ', $options) : '-';
         
         // Status Toggle
         $statusIcon = $isActive ? 'circle' : 'circle-o';
@@ -118,20 +118,20 @@ if ([] === $abbreviations) {
             <td>' . rex_escape($abbreviation->getTitle()) . '</td>
             <td>' . rex_escape($languageLabel) . '</td>
             <td>' . rex_escape($optionsStr) . '</td>
-            <td>' . (int) $abbreviation->getPriority() . '</td>
+            <td>' . $abbreviation->getPriority() . '</td>
             <td>' . $statusLabel . '</td>
             <td class="rex-table-action">
-                <a href="' . rex_url::currentBackendPage(['page' => 'snippets/abbreviations/edit', 'id' => $id]) . '" title="' . $addon->i18n('abbreviation_edit') . '">
+                <a href="' . rex_url::currentBackendPage(['page' => 'snippets/abbreviations/edit', 'id' => $abbrId]) . '" title="' . $addon->i18n('abbreviation_edit') . '">
                     <i class="rex-icon rex-icon-edit"></i>
                 </a>
             </td>
             <td class="rex-table-action">
-                <a href="' . rex_url::backendPage('snippets/abbreviations/overview', ['func' => 'status', 'id' => $id]) . '" title="' . $statusTitle . '">
+                <a href="' . rex_url::backendPage('snippets/abbreviations/overview', ['func' => 'status', 'id' => $abbrId]) . '" title="' . $statusTitle . '">
                     <i class="rex-icon fa-' . $statusIcon . '"></i>
                 </a>
             </td>
             <td class="rex-table-action">
-                <a href="' . rex_url::backendPage('snippets/abbreviations/overview', ['func' => 'delete', 'id' => $id]) . '" 
+                <a href="' . rex_url::backendPage('snippets/abbreviations/overview', ['func' => 'delete', 'id' => $abbrId]) . '" 
                    data-confirm="' . $addon->i18n('abbreviation_delete_confirm') . '" 
                    title="' . $addon->i18n('abbreviation_delete') . '">
                     <i class="rex-icon rex-icon-delete"></i>

@@ -33,10 +33,10 @@ if ('save' === $func) {
 }
 
 // Aktuelle Einstellungen
-$phpExecutionEnabled = $addon->getConfig('php_execution_enabled', true);
-$sprogAbbrevEnabled = $addon->getConfig('sprog_abbrev_enabled', true);
-$debugMode = $addon->getConfig('debug_mode', false);
-$abbreviationExcludeSelectors = $addon->getConfig('abbreviation_exclude_selectors', "a\nnav\ncode\npre");
+$phpExecutionEnabled = (bool) $addon->getConfig('php_execution_enabled', true);
+$sprogAbbrevEnabled = (bool) $addon->getConfig('sprog_abbrev_enabled', true);
+$debugMode = (bool) $addon->getConfig('debug_mode', false);
+$abbreviationExcludeSelectors = (string) $addon->getConfig('abbreviation_exclude_selectors', "a\nnav\ncode\npre");
 
 $content = '
 <form method="post" action="' . rex_url::currentBackendPage() . '">

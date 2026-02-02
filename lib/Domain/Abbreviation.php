@@ -17,7 +17,7 @@ class Abbreviation
     private string $abbr;
     private string $title;
     private ?string $description;
-    private ?string $language;
+    private ?int $language;
     private bool $caseSensitive;
     private bool $wholeWord;
     private string $scopeContext;
@@ -54,8 +54,8 @@ class Abbreviation
         $abbr->id = (int) ($data['id'] ?? 0);
         $abbr->abbr = (string) ($data['abbr'] ?? '');
         $abbr->title = (string) ($data['title'] ?? '');
-        $abbr->description = $data['description'] ?? null;
-        $abbr->language = $data['language'] ?? null;
+        $abbr->description = isset($data['description']) && '' !== $data['description'] ? (string) $data['description'] : null;
+        $abbr->language = isset($data['language']) && '' !== $data['language'] && 0 !== (int) $data['language'] ? (int) $data['language'] : null;
         $abbr->caseSensitive = (bool) ($data['case_sensitive'] ?? false);
         $abbr->wholeWord = (bool) ($data['whole_word'] ?? true);
         $abbr->scopeContext = (string) ($data['scope_context'] ?? self::CONTEXT_FRONTEND);
@@ -84,7 +84,7 @@ class Abbreviation
     public function getAbbr(): string { return $this->abbr; }
     public function getTitle(): string { return $this->title; }
     public function getDescription(): ?string { return $this->description; }
-    public function getLanguage(): ?string { return $this->language; }
+    public function getLanguage(): ?int { return $this->language; }
     public function isCaseSensitive(): bool { return $this->caseSensitive; }
     public function isWholeWord(): bool { return $this->wholeWord; }
     public function getScopeContext(): string { return $this->scopeContext; }
@@ -93,7 +93,7 @@ class Abbreviation
     public function getScopeUrlPattern(): ?string { return $this->scopeUrlPattern; }
     public function getPriority(): int { return $this->priority; }
     public function isActive(): bool { return $this->status; }
-    public function getStatus(): bool { return $this->status; }
+    public function getStatus(): int { return $this->status ? self::STATUS_ACTIVE : self::STATUS_INACTIVE; }
 
     /**
      * Prüft ob Abkürzung für Kontext gilt

@@ -39,6 +39,9 @@ page:
         settings:
             title: 'translate:snippets_settings'
             perm: snippets[admin]
+        import_export:
+            title: 'translate:snippets_import_export'
+            perm: snippets[admin]
         help:
             title: 'translate:snippets_help'
             subPath: README.md

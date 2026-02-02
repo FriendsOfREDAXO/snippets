@@ -15,14 +15,14 @@ use FriendsOfREDAXO\Snippets\Util\ContextDetector;
 require_once __DIR__ . '/functions/snippets.php';
 
 // Berechtigungen registrieren
-if (rex::isBackend() && rex::getUser()) {
+if (rex::isBackend() && null !== rex::getUser()) {
     rex_perm::register('snippets[admin]', rex_i18n::msg('perm_general_snippets[admin]'));
     rex_perm::register('snippets[editor]', rex_i18n::msg('perm_general_snippets[editor]'));
     rex_perm::register('snippets[viewer]', rex_i18n::msg('perm_general_snippets[viewer]'));
 }
 
 // Assets im Backend laden
-if (rex::isBackend() && rex::getUser()) {
+if (rex::isBackend() && null !== rex::getUser()) {
     rex_view::addJsFile(rex_url::addonAssets('snippets', 'snippets.js'));
 }
 
@@ -32,8 +32,7 @@ if (!rex::isBackend()) {
         $content = $ep->getSubject();
 
         // 1. Snippet-Keys ersetzen
-        $service = new ReplacementService();
-        $content = $service->replace($content, [
+        $content = ReplacementService::replace($content, [
             'clang_id' => rex_clang::getCurrentId(),
         ]);
 
@@ -41,7 +40,7 @@ if (!rex::isBackend()) {
         $content = HtmlReplacementService::process($content, 'frontend');
 
         // 3. Abkürzungen kennzeichnen
-        $content = AbbreviationService::process($content, 'frontend', rex_clang::getCurrentId());
+        $content = AbbreviationService::process($content, 'frontend');
 
         return $content;
     }, rex_extension::NORMAL);
@@ -58,8 +57,7 @@ if (rex::isBackend()) {
         $content = $ep->getSubject();
 
         // 1. Snippet-Keys ersetzen
-        $service = new ReplacementService();
-        $content = $service->replace($content, [
+        $content = ReplacementService::replace($content, [
             'context' => 'backend',
             'clang_id' => rex_clang::getCurrentId(),
         ]);
@@ -68,7 +66,7 @@ if (rex::isBackend()) {
         $content = HtmlReplacementService::process($content, 'backend');
 
         // 3. Abkürzungen kennzeichnen
-        $content = AbbreviationService::process($content, 'backend', rex_clang::getCurrentId());
+        $content = AbbreviationService::process($content, 'backend');
 
         return $content;
     }, rex_extension::NORMAL);
