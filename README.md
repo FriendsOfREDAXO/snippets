@@ -224,9 +224,42 @@ Filter formatieren die Snippet-Ausgabe. Sie werden mit `|` notiert und können k
 
 ---
 
-## Helper-Funktionen
+## PHP-API
 
-Globale PHP-Funktionen für einfachen Zugriff auf Snippets.
+### Snippets-Klasse (empfohlen)
+
+Die zentrale API-Klasse für den Zugriff auf Snippets.
+
+```php
+use FriendsOfREDAXO\Snippets\Snippets;
+
+// Snippet abrufen
+echo Snippets::get('footer_text');
+echo Snippets::get('greeting', ['name' => 'Max']);
+
+// Mit Filtern
+echo Snippets::filtered('headline', [], 'upper');
+echo Snippets::filtered('content', [], 'markdown|sanitize');
+
+// Platzhalter in Text ersetzen
+$html = '<h1>[[snippet:headline]]</h1>';
+echo Snippets::apply($html);
+
+// Existenz prüfen
+if (Snippets::exists('special_offer')) {
+    echo Snippets::get('special_offer');
+}
+
+// Mit Fallback
+echo Snippets::getOr('headline', 'Willkommen');
+
+// Beliebigen Text filtern
+echo Snippets::filter($content, 'escape|truncate(100)');
+```
+
+### Legacy-Funktionen
+
+Globale PHP-Funktionen (für Abwärtskompatibilität).
 
 ### snippet()
 
