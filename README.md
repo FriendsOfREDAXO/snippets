@@ -1,4 +1,4 @@
-# Snippets AddOn
+# 🐣 Snippets AddOn
 
 Eine moderne Alternative zum xoutputfilter AddOn für REDAXO CMS.
 
