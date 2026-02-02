@@ -36,12 +36,18 @@ if ('export' === $action && $csrfToken->isValid()) {
     if ($result['success'] && isset($result['data'])) {
         // JSON-Download senden
         $filename = 'snippets_' . $type . '_' . date('Y-m-d_His') . '.json';
+        $data = $result['data'];
 
         rex_response::cleanOutputBuffers();
-        rex_response::sendContentType('application/json');
-        rex_response::setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        rex_response::setHeader('Content-Length', (string) strlen($result['data']));
-        echo $result['data'];
+        
+        // Header für Download setzen
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . strlen($data));
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Pragma: no-cache');
+        
+        echo $data;
         exit;
     }
 
