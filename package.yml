@@ -1,0 +1,54 @@
+package: snippets
+version: '1.0.0-dev'
+author: REDAXO Community
+supportpage: https://github.com/FriendsOfREDAXO/snippets
+
+page:
+    title: 'Snippets'
+    icon: rex-icon fa-code
+    perm: snippets[]
+    subpages:
+        overview:
+            title: 'translate:snippets_overview'
+            perm: snippets[]
+        edit:
+            title: 'translate:snippets_edit'
+            perm: snippets[admin|editor]
+            hidden: true
+        categories:
+            title: 'translate:snippets_categories'
+            perm: snippets[admin]
+        html_replacement:
+            title: 'translate:snippets_html_replacements'
+            perm: snippets[admin]
+            subpages:
+                overview:
+                    title: 'translate:snippets_html_replacement_overview'
+                edit:
+                    title: 'translate:snippets_html_replacement_edit_title'
+                    hidden: true
+        abbreviations:
+            title: 'translate:abbreviations'
+            perm: snippets[admin]
+            subpages:
+                overview:
+                    title: 'translate:abbreviations_overview'
+                edit:
+                    title: 'translate:abbreviation_edit'
+                    hidden: true
+        settings:
+            title: 'translate:snippets_settings'
+            perm: snippets[admin]
+        help:
+            title: 'translate:snippets_help'
+            subPath: README.md
+            itemClass: pull-right
+            perm: snippets[]
+
+requires:
+    redaxo: ^5.20.0
+    php:
+        version: ^8.4
+
+suggests:
+    sprog: 'Für Abkürzungen-Feature'

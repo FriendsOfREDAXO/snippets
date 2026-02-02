@@ -1,0 +1,264 @@
+snippets = Snippets
+snippets_title = Snippets verwalten
+
+# Hauptnavigation
+snippets_overview = Übersicht
+snippets_edit = Snippet bearbeiten
+snippets_categories = Kategorien
+snippets_html_replacements = HTML-Ersetzungen
+snippets_settings = Einstellungen
+snippets_help = Hilfe
+
+# Übersichtsseite
+snippets_list_title = Snippet-Übersicht
+snippets_add = Snippet hinzufügen
+snippets_search_placeholder = Snippets durchsuchen...
+snippets_filter_category = Nach Kategorie filtern
+snippets_filter_context = Nach Kontext filtern
+snippets_filter_type = Nach Typ filtern
+snippets_no_snippets = Keine Snippets gefunden
+
+# Tabellenspalten
+snippets_col_shortcode = Shortcode
+snippets_col_title = Titel
+snippets_col_type = Typ
+snippets_col_context = Kontext
+snippets_col_category = Kategorie
+snippets_col_status = Status
+snippets_col_functions = Funktionen
+
+# Snippet-Typen
+snippets_type_html = HTML
+snippets_type_php = PHP
+snippets_type_text = Text
+snippets_type_html_replace = HTML-Ersetzung (CSS-Selektor)
+
+# Context
+snippets_context_frontend = Frontend
+snippets_context_backend = Backend
+snippets_context_both = Frontend & Backend
+
+# Status
+snippets_status = Status
+snippets_status_active = Aktiv
+snippets_status_inactive = Inaktiv
+
+# Formular
+snippets_form_key = Schlüssel
+snippets_form_key_notice = Eindeutiger Schlüssel für das Snippet (nur a-z, 0-9, -, _)
+snippets_form_title = Titel
+snippets_form_description = Beschreibung
+snippets_form_content = Inhalt
+snippets_form_content_type = Inhaltstyp
+snippets_form_context = Kontext
+snippets_form_category = Kategorie
+snippets_form_status = Status
+snippets_form_multilang = Mehrsprachig
+
+# HTML-Selector-Modus
+snippets_html_mode_legend = HTML-Ersetzung (CSS-Selektor)
+snippets_html_mode_help = Ermöglicht das Ersetzen oder Einfügen von Inhalten basierend auf CSS-Selektoren wie h1, .class, #id
+snippets_html_mode_enabled = HTML-Ersetzungsmodus aktivieren
+snippets_html_search_mode = Was möchten Sie ersetzen?
+snippets_html_search_mode_selector = CSS-Selektor (z.B. h1, .class)
+snippets_html_search_mode_code = Konkreter HTML-Code
+snippets_html_selector = CSS-Selektor
+snippets_html_selector_help = Beispiele: h1 (alle h1-Elemente), #heading (Element mit ID), .title (Elemente mit Klasse), div.content
+snippets_html_code_search = HTML-Code zum Ersetzen
+snippets_html_code_search_help = Geben Sie den exakten HTML-Code ein, der ersetzt werden soll (z.B. <h1>Snippets verwalten</h1>)
+snippets_html_replacement = Neuer HTML-Code
+snippets_html_replacement_help = Dieser Inhalt wird als Ersatz eingefügt
+snippets_html_position = Position
+snippets_html_position_help = Wo soll der Inhalt eingefügt werden?
+snippets_html_position_replace = Element ersetzen
+snippets_html_position_before = Vor dem Element
+snippets_html_position_after = Nach dem Element
+snippets_html_position_prepend = Als erstes Kind
+snippets_html_position_append = Als letztes Kind
+
+# Mehrsprachigkeit
+snippets_tab_main = Hauptdaten
+snippets_tab_translations = Übersetzungen
+snippets_translations_title = Übersetzungen verwalten
+snippets_translations_help = Hier können Sie sprachspezifische Inhalte für jede aktivierte Sprache hinterlegen. Die Standardsprache wird im Haupt-Tab bearbeitet.
+snippets_translations_legend = Übersetzungen
+snippets_translations_default = Standard-Inhalt (Fallback)
+snippets_translations_has_translation = Übersetzung vorhanden
+snippets_translations_no_translation = Keine Übersetzung - Standard-Inhalt wird verwendet
+snippets_translations_saved = Übersetzungen wurden gespeichert
+snippets_back_to_main = Zurück zu Hauptdaten
+snippets_translation_tab = Übersetzungen
+snippets_translation_for = Inhalt für {0}
+snippets_translation_missing = Noch keine Übersetzung vorhanden
+
+# Buttons
+snippets_save = Speichern
+snippets_search = Suchen
+snippets_delete = Löschen
+snippets_required = Pflichtfeld
+snippets_confirm_delete = Wirklich löschen
+snippets_btn_save = Speichern
+snippets_btn_save_and_close = Speichern und schließen
+snippets_btn_cancel = Abbrechen
+snippets_btn_delete = Löschen
+snippets_btn_copy_shortcode = Shortcode kopieren
+
+# Messages
+snippets_saved = Snippet wurde gespeichert
+snippets_deleted = Snippet wurde gelöscht
+snippets_error_key_exists = Ein Snippet mit diesem Schlüssel existiert bereits
+snippets_error_invalid_key = Ungültiger Schlüssel (nur a-z, 0-9, -, _ erlaubt)
+snippets_error_php_permission = Keine Berechtigung für PHP-Snippets
+snippets_copied_to_clipboard = Shortcode wurde in die Zwischenablage kopiert
+
+# Berechtigungen
+perm_general_snippets[] = Snippets: Zugriff auf AddOn
+perm_general_snippets[admin] = Snippets: Vollzugriff & PHP-Snippets
+perm_general_snippets[editor] = Snippets: Bearbeiten (HTML/Text)
+perm_general_snippets[viewer] = Snippets: Nur ansehen
+
+# Kategorien
+snippets_category_add = Kategorie hinzufügen
+snippets_category_name = Name
+snippets_category_icon = Icon
+snippets_category_saved = Kategorie wurde gespeichert
+snippets_category_deleted = Kategorie wurde gelöscht
+
+# Einstellungen
+snippets_settings_title = Snippet-Einstellungen
+snippets_settings_general = Allgemeine Einstellungen
+snippets_settings_security = Sicherheit
+snippets_settings_cache = Cache
+snippets_settings_sprog_integration = Sprog-Integration
+snippets_settings_sprog_abbrev = Sprog-Wildcards aktivieren
+snippets_settings_php_execution = PHP-Ausführung erlauben
+snippets_settings_php_execution_notice = PHP-Code kann nur von Administratoren und Benutzern mit Berechtigung bearbeitet werden
+
+# Hilfe
+snippets_help_usage = Verwendung
+snippets_help_usage_text = Snippets können über Platzhalter in Artikeln und Modulen verwendet werden
+snippets_help_syntax = Syntax
+snippets_help_examples = Beispiele
+snippets_help_security = Sicherheitshinweise
+snippets_help_security_text = PHP-Snippets werden isoliert ausgeführt und sind nur für Administratoren verfügbar
+
+# HTML-Ersetzungen
+snippets_html_replacement_overview = HTML-Ersetzungen Übersicht
+snippets_html_replacement_add = Regel hinzufügen
+snippets_html_replacement_add_title = Neue HTML-Ersetzungsregel
+snippets_html_replacement_edit_title = HTML-Ersetzungsregel bearbeiten
+snippets_html_replacement_info = %d Regel(n) insgesamt, %d aktiv
+snippets_html_replacement_no_rules = Noch keine Ersetzungsregeln vorhanden
+snippets_html_replacement_name = Name
+snippets_html_replacement_description = Beschreibung
+snippets_html_replacement_type = Typ
+snippets_html_replacement_scope = Gültigkeitsbereich
+snippets_html_replacement_priority = Priorität
+snippets_html_replacement_priority_help = Höhere Werte werden zuerst ausgeführt (0-100)
+snippets_html_replacement_active = Aktiv
+snippets_html_replacement_saved = HTML-Ersetzungsregel wurde gespeichert
+snippets_html_replacement_deleted = HTML-Ersetzungsregel wurde gelöscht
+snippets_html_replacement_status_changed = Status wurde geändert
+snippets_html_replacement_not_found = HTML-Ersetzungsregel nicht gefunden
+snippets_html_replacement_basics = Grundeinstellungen
+snippets_html_replacement_rule = Ersetzungsregel
+snippets_html_replacement_scope = Gültigkeitsbereich
+
+# HTML-Ersetzung Fehler
+snippets_html_replacement_error_name_empty = Bitte geben Sie einen Namen ein
+snippets_html_replacement_error_name_exists = Eine Regel mit diesem Namen existiert bereits
+snippets_html_replacement_error_search_empty = Bitte geben Sie einen Suchwert ein
+snippets_html_replacement_error_replacement_empty = Bitte geben Sie einen Ersetzungs-Inhalt ein
+snippets_html_replacement_error_invalid_regex = Ungültiger Regex-Ausdruck
+
+# HTML-Ersetzung Typen
+snippets_html_replacement_type_css_selector = CSS-Selektor
+snippets_html_replacement_type_html_match = HTML-Code
+snippets_html_replacement_type_regex = Regex
+snippets_html_replacement_type_php_callback = PHP Callback
+
+# HTML-Ersetzung Felder
+snippets_html_replacement_search_value = Suchwert
+snippets_html_replacement_search_help_css = Beispiele: h1 (alle h1), #id (Element mit ID), .class (Klasse), div.content p
+snippets_html_replacement_search_help_html = Geben Sie den exakten HTML-Code ein, der ersetzt werden soll
+snippets_html_replacement_search_help_regex = Regulärer Ausdruck mit Delimitern, z.B. /<h1>(.*?)<\/h1>/
+snippets_html_replacement_search_help_callback = Suchwert (HTML/Regex), dann im Ersetzungs-Feld: ClassName::methodName - Methode bekommt (string $search, string $content, HtmlReplacement $rule): string
+snippets_html_replacement_replacement = Ersetzungs-Inhalt
+snippets_html_replacement_position = Position
+
+# HTML-Ersetzung Scope
+snippets_html_replacement_scope_context = Kontext
+snippets_html_replacement_scope_templates = Templates
+snippets_html_replacement_scope_templates_help = Leer = gilt für alle Templates (Strg/Cmd für Mehrfachauswahl)
+snippets_html_replacement_scope_categories = Kategorien
+snippets_html_replacement_scope_categories_help = Leer = gilt für alle Kategorien (Strg/Cmd für Mehrfachauswahl)
+snippets_html_replacement_scope_url_pattern = URL-Pattern (Regex)
+snippets_html_replacement_scope_url_help = Z.B. /^\/news/ für alle URLs die mit /news beginnen (leer = alle)
+snippets_html_replacement_scope_backend_pages = Backend-Seiten
+snippets_html_replacement_scope_backend_help = Leer = gilt für alle Backend-Seiten (Strg/Cmd für Mehrfachauswahl)
+
+# Common
+snippets_save_and_close = Speichern und schließen
+snippets_cancel = Abbrechen
+snippets_toggle_status = Status ändern
+snippets_delete_confirm = Wirklich löschen?
+snippets_csrf_error = Ungültige Anfrage (CSRF-Token)
+snippets_functions = Funktionen
+
+# Abkürzungen
+abbreviations = Abkürzungen
+abbreviations_overview = Abkürzungen Übersicht
+abbreviations_list = Abkürzungen Liste
+abbreviations_empty = Noch keine Abkürzungen vorhanden
+abbreviation_add = Abkürzung hinzufügen
+abbreviation_edit = Abkürzung bearbeiten
+abbreviation_save = Speichern
+abbreviation_saved = Abkürzung wurde gespeichert
+abbreviation_save_failed = Fehler beim Speichern der Abkürzung
+abbreviation_delete = Löschen
+abbreviation_deleted = Abkürzung wurde gelöscht
+abbreviation_delete_failed = Fehler beim Löschen der Abkürzung
+abbreviation_delete_confirm = Abkürzung wirklich löschen?
+abbreviation_not_found = Abkürzung nicht gefunden
+abbreviation_abort = Abbrechen
+
+# Abkürzungen Felder
+abbreviation_abbr = Abkürzung
+abbreviation_abbr_info = Die Kurzform, z.B. "HTML", "CSS", "API"
+abbreviation_title = Ausschreibung/Titel
+abbreviation_title_info = Die vollständige Ausschreibung, z.B. "HyperText Markup Language"
+abbreviation_description = Beschreibung
+abbreviation_description_info = Optional: Zusätzliche Informationen zur Abkürzung
+abbreviation_language = Sprache
+abbreviation_language_info = Sprache für die diese Abkürzung gilt (leer = alle Sprachen)
+abbreviation_language_all = Alle Sprachen
+abbreviation_options = Optionen
+abbreviation_case_sensitive = Groß-/Kleinschreibung beachten
+abbreviation_case_sensitive_info = Wenn aktiviert, wird nur "HTML" ersetzt, nicht "html"
+abbreviation_whole_word = Nur ganze Wörter
+abbreviation_whole_word_info = Wenn aktiviert, wird nur "HTML" als ganzes Wort ersetzt, nicht in "MyHTMLClass"
+abbreviation_priority = Priorität
+abbreviation_priority_info = Höhere Werte werden zuerst verarbeitet (0-100)
+abbreviation_status = Status
+abbreviation_status_updated = Status wurde aktualisiert
+abbreviation_status_update_failed = Fehler beim Aktualisieren des Status
+abbreviation_status_activate = Aktivieren
+abbreviation_status_deactivate = Deaktivieren
+abbreviation_contexts = Kontexte
+abbreviation_contexts_info = Wo soll die Abkürzung angewendet werden?
+abbreviation_functions = Funktionen
+
+# Abkürzungen Fehler
+abbreviation_error_abbr_empty = Bitte geben Sie eine Abkürzung ein
+abbreviation_error_title_empty = Bitte geben Sie eine Ausschreibung ein
+abbreviation_error_duplicate = Eine Abkürzung mit diesem Namen existiert bereits für diese Sprache
+
+# Abkürzungen Settings
+abbreviation_exclude_selectors = Bereiche ausschließen (CSS-Selektoren)
+abbreviation_exclude_selectors_info = CSS-Selektoren für Bereiche, in denen keine Abkürzungen ersetzt werden sollen. Ein Selektor pro Zeile. Beispiele: a (Links), nav (Navigation), #main (Element mit ID), .no-abbr (Klasse)
+
+# Kontext
+context_frontend = Frontend
+context_backend = Backend
+status_active = Aktiv
+status_inactive = Inaktiv
