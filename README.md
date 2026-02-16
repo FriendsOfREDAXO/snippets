@@ -10,7 +10,6 @@ Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fr
 - **Snippets** – Wiederverwendbare HTML/PHP-Fragmente mit Parametern
 - **Filter** – 26+ Filter für Textformatierung
 - **HTML-Ersetzungen** – CSS-Selektoren, Regex und PHP-Callbacks
-- **Abkürzungen** – Automatische `<abbr>`-Tags für Akronyme
 - **PHP-API** – `Snippets::get()`, `Snippets::apply()` für PHP-Zugriff
 - **Scope-Kontrolle** – Templates, Kategorien, URLs, Backend-Seiten
 - **Berechtigungssystem** – Admin, Editor, Viewer Rollen

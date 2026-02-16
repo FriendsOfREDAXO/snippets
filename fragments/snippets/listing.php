@@ -9,9 +9,12 @@ use FriendsOfREDAXO\Snippets\Domain\Snippet;
 
 /** @var array<int, Snippet> $snippets */
 $snippets = $this->getVar('snippets');
+/** @var array<int, string> $categories */
+$categories = $this->getVar('categories', []);
 $can_edit = $this->getVar('can_edit');
 $can_edit_php = $this->getVar('can_edit_php');
 $search = $this->getVar('search');
+$currentCategory = $this->getVar('category');
 
 ?>
 
@@ -26,7 +29,7 @@ $search = $this->getVar('search');
             <form method="get" action="<?= rex_url::currentBackendPage() ?>">
                 <input type="hidden" name="page" value="snippets/overview">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label><?= rex_i18n::msg('snippets_search_placeholder') ?></label>
                             <input type="text" class="form-control" name="search" 
@@ -34,7 +37,22 @@ $search = $this->getVar('search');
                                    placeholder="<?= rex_i18n::msg('snippets_search_placeholder') ?>">
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <?php if (!empty($categories)): ?>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label><?= rex_i18n::msg('snippets_filter_category') ?></label>
+                            <select class="form-control" name="category">
+                                <option value="0"><?= rex_i18n::msg('snippets_all') ?></option>
+                                <?php foreach ($categories as $catId => $catName): ?>
+                                <option value="<?= $catId ?>" <?= (int) $currentCategory === $catId ? 'selected' : '' ?>>
+                                    <?= rex_escape($catName) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>&nbsp;</label>
                             <button type="submit" class="btn btn-primary form-control">
@@ -62,6 +80,7 @@ $search = $this->getVar('search');
                 <tr>
                     <th><?= rex_i18n::msg('snippets_col_shortcode') ?></th>
                     <th><?= rex_i18n::msg('snippets_col_title') ?></th>
+                    <th><?= rex_i18n::msg('snippets_col_category') ?></th>
                     <th><?= rex_i18n::msg('snippets_col_type') ?></th>
                     <th><?= rex_i18n::msg('snippets_col_context') ?></th>
                     <th><?= rex_i18n::msg('snippets_col_status') ?></th>
@@ -73,7 +92,7 @@ $search = $this->getVar('search');
             <tbody>
                 <?php if (empty($snippets)): ?>
                 <tr>
-                    <td colspan="<?= $can_edit ? 6 : 5 ?>" class="text-center">
+                    <td colspan="<?= $can_edit ? 7 : 6 ?>" class="text-center">
                         <?= rex_i18n::msg('snippets_no_snippets') ?>
                     </td>
                 </tr>
@@ -93,6 +112,14 @@ $search = $this->getVar('search');
                         <?php if ($snippet->getDescription()): ?>
                         <br><small class="text-muted"><?= rex_escape($snippet->getDescription()) ?></small>
                         <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php
+                        $catId = $snippet->getCategoryId();
+                        if ($catId && isset($categories[$catId])) {
+                            echo '<span class="label label-default">' . rex_escape($categories[$catId]) . '</span>';
+                        }
+                        ?>
                     </td>
                     <td>
                         <?php if ('php' === $snippet->getContentType()): ?>
@@ -117,10 +144,20 @@ $search = $this->getVar('search');
                         <span class="label label-info"><?= $contextLabel ?></span>
                     </td>
                     <td>
-                        <?php if ($snippet->isActive()): ?>
-                            <span class="rex-online"><i class="rex-icon rex-icon-online"></i></span>
+                        <?php if ($can_edit): ?>
+                            <a href="<?= rex_url::currentBackendPage(['func' => 'toggle_status', 'id' => $snippet->getId()] + ($search ? ['search' => $search] : []) + ($currentCategory ? ['category' => $currentCategory] : [])) ?>">
+                                <?php if ($snippet->isActive()): ?>
+                                    <span class="rex-online"><i class="rex-icon rex-icon-online"></i></span>
+                                <?php else: ?>
+                                    <span class="rex-offline"><i class="rex-icon rex-icon-offline"></i></span>
+                                <?php endif; ?>
+                            </a>
                         <?php else: ?>
-                            <span class="rex-offline"><i class="rex-icon rex-icon-offline"></i></span>
+                            <?php if ($snippet->isActive()): ?>
+                                <span class="rex-online"><i class="rex-icon rex-icon-online"></i></span>
+                            <?php else: ?>
+                                <span class="rex-offline"><i class="rex-icon rex-icon-offline"></i></span>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </td>
                     <?php if ($can_edit): ?>
@@ -149,36 +186,19 @@ $search = $this->getVar('search');
 
 <script nonce="<?= rex_response::getNonce() ?>">
 jQuery(function($) {
-    // Copy-to-Clipboard Funktion
+    // Copy-to-Clipboard
     $('.rex-js-copy-shortcode').on('click', function(e) {
         e.preventDefault();
-        
         var shortcode = $(this).data('shortcode');
         var $btn = $(this);
         
-        // Clipboard API verwenden
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(shortcode).then(function() {
-                // Success Feedback
                 $btn.removeClass('btn-default').addClass('btn-success');
                 setTimeout(function() {
                     $btn.removeClass('btn-success').addClass('btn-default');
                 }, 1500);
-            }).catch(function(err) {
-                console.error('Copy failed:', err);
             });
-        } else {
-            // Fallback für ältere Browser
-            var $temp = $('<textarea>');
-            $('body').append($temp);
-            $temp.val(shortcode).select();
-            document.execCommand('copy');
-            $temp.remove();
-            
-            $btn.removeClass('btn-default').addClass('btn-success');
-            setTimeout(function() {
-                $btn.removeClass('btn-success').addClass('btn-default');
-            }, 1500);
         }
     });
 });

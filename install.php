@@ -86,28 +86,6 @@ rex_sql_table::get(rex::getTable('snippets_html_replacement'))
     ->ensureIndex(new rex_sql_index('priority', ['priority']))
     ->ensure();
 
-// Tabelle für Abkürzungen/Akronyme
-rex_sql_table::get(rex::getTable('snippets_abbreviation'))
-    ->ensurePrimaryIdColumn()
-    ->ensureColumn(new rex_sql_column('abbr', 'varchar(100)', false))
-    ->ensureColumn(new rex_sql_column('title', 'varchar(500)', false))
-    ->ensureColumn(new rex_sql_column('description', 'text', true))
-    ->ensureColumn(new rex_sql_column('language', 'varchar(10)', true))
-    ->ensureColumn(new rex_sql_column('case_sensitive', 'tinyint(1)', false, '0'))
-    ->ensureColumn(new rex_sql_column('whole_word', 'tinyint(1)', false, '1'))
-    ->ensureColumn(new rex_sql_column('scope_context', 'varchar(20)', false, 'frontend'))
-    ->ensureColumn(new rex_sql_column('scope_templates', 'text', true))
-    ->ensureColumn(new rex_sql_column('scope_categories', 'text', true))
-    ->ensureColumn(new rex_sql_column('scope_url_pattern', 'text', true))
-    ->ensureColumn(new rex_sql_column('priority', 'int(11)', false, '10'))
-    ->ensureColumn(new rex_sql_column('status', 'tinyint(1)', false, '1'))
-    ->ensureGlobalColumns()
-    ->ensureIndex(new rex_sql_index('abbr', ['abbr']))
-    ->ensureIndex(new rex_sql_index('status', ['status']))
-    ->ensureIndex(new rex_sql_index('priority', ['priority']))
-    ->ensureIndex(new rex_sql_index('language', ['language']))
-    ->ensure();
-
 // Beispiel-Snippet erstellen
 $sql = rex_sql::factory();
 $sql->setQuery('SELECT 1 FROM ' . rex::getTable('snippets_snippet') . ' LIMIT 1');

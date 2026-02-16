@@ -27,15 +27,6 @@ page:
                 edit:
                     title: 'translate:snippets_html_replacement_edit_title'
                     hidden: true
-        abbreviations:
-            title: 'translate:abbreviations'
-            perm: snippets[admin]
-            subpages:
-                overview:
-                    title: 'translate:abbreviations_overview'
-                edit:
-                    title: 'translate:abbreviation_edit'
-                    hidden: true
         settings:
             title: 'translate:snippets_settings'
             perm: snippets[admin]

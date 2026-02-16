@@ -2,7 +2,7 @@ snippets = Snippets
 snippets_title = Manage Snippets
 
 # Main navigation
-snippets_overview = Overview
+snippets_overview = Snippets
 snippets_edit = Edit Snippet
 snippets_categories = Categories
 snippets_html_replacements = HTML Replacements
@@ -16,6 +16,7 @@ snippets_search_placeholder = Search snippets...
 snippets_filter_category = Filter by category
 snippets_filter_context = Filter by context
 snippets_filter_type = Filter by type
+snippets_all = All categories
 snippets_no_snippets = No snippets found
 
 # Table columns
@@ -98,6 +99,7 @@ snippets_delete = Delete
 snippets_required = Required
 snippets_confirm_delete = Really delete
 snippets_btn_save = Save
+snippets_status_updated = Status has been updated
 snippets_btn_save_and_close = Save and close
 snippets_btn_cancel = Cancel
 snippets_btn_delete = Delete

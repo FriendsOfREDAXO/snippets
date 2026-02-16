@@ -147,17 +147,6 @@ $isMultilang = $snippet ? $snippet->isMultilang() : false;
                             <?= rex_i18n::msg('snippets_form_status') ?>
                         </label>
                     </div>
-
-                    <!-- Mehrsprachig -->
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" 
-                                   name="is_multilang" 
-                                   value="1" 
-                                   <?= $isMultilang ? 'checked' : '' ?>>
-                            <?= rex_i18n::msg('snippets_form_multilang') ?>
-                        </label>
-                    </div>
                 </fieldset>
 
                 <!-- Buttons -->

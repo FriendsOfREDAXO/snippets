@@ -60,15 +60,13 @@ class SnippetService
      */
     private static function getContent(Snippet $snippet, int $clangId): string
     {
-        if (!$snippet->isMultilang()) {
-            return $snippet->getContent();
-        }
+        // Mehrsprachigen Content aus Translation-Tabelle holen (wenn System mehrsprachig)
+        if (rex_clang::count() > 1) {
+            $translation = SnippetRepository::getTranslation($snippet->getId(), $clangId);
 
-        // Mehrsprachigen Content aus Translation-Tabelle holen
-        $translation = SnippetRepository::getTranslation($snippet->getId(), $clangId);
-
-        if (null !== $translation) {
-            return $translation;
+            if (null !== $translation) {
+                return $translation;
+            }
         }
 
         // Fallback auf Standard-Content

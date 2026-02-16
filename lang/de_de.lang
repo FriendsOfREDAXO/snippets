@@ -2,7 +2,7 @@ snippets = Snippets
 snippets_title = Snippets verwalten
 
 # Hauptnavigation
-snippets_overview = Übersicht
+snippets_overview = Snippets
 snippets_edit = Snippet bearbeiten
 snippets_categories = Kategorien
 snippets_html_replacements = HTML-Ersetzungen
@@ -16,6 +16,7 @@ snippets_search_placeholder = Snippets durchsuchen...
 snippets_filter_category = Nach Kategorie filtern
 snippets_filter_context = Nach Kontext filtern
 snippets_filter_type = Nach Typ filtern
+snippets_all = Alle Kategorien
 snippets_no_snippets = Keine Snippets gefunden
 
 # Tabellenspalten
@@ -54,6 +55,7 @@ snippets_form_context = Kontext
 snippets_form_category = Kategorie
 snippets_form_status = Status
 snippets_form_multilang = Mehrsprachig
+snippets_help_multilang = Wenn aktiviert, können sprachspezifische Inhalte in separaten Tabs gepflegt werden. Ohne Übersetzung wird der Standard-Inhalt angezeigt.
 
 # HTML-Selector-Modus
 snippets_html_mode_legend = HTML-Ersetzung (CSS-Selektor)
@@ -98,6 +100,7 @@ snippets_delete = Löschen
 snippets_required = Pflichtfeld
 snippets_confirm_delete = Wirklich löschen
 snippets_btn_save = Speichern
+snippets_status_updated = Status wurde aktualisiert
 snippets_btn_save_and_close = Speichern und schließen
 snippets_btn_cancel = Abbrechen
 snippets_btn_delete = Löschen

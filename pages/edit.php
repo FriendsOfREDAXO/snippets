@@ -144,8 +144,8 @@ for ($i = 0; $i < $sql->getRows(); ++$i) {
     $sql->next();
 }
 
-// Wenn Snippet geladen und mehrsprachig, zeige Tabs
-if (null !== $snippet && $snippet->isMultilang() && $id > 0) {
+// Wenn Snippet geladen und System mehrsprachig, zeige Tabs
+if (null !== $snippet && rex_clang::count() > 1 && $id > 0) {
     // Tab-Navigation
     $currentTab = rex_request::get('tab', 'string', 'main');
     
@@ -179,7 +179,7 @@ if (null !== $snippet && $snippet->isMultilang() && $id > 0) {
         echo $fragment->parse('snippets/edit_form.php');
     }
 } else {
-    // Kein mehrsprachiges Snippet oder neues Snippet
+    // Kein mehrsprachiges System oder neues Snippet
     $fragment = new rex_fragment();
     $fragment->setVar('snippet', $snippet, false);
     $fragment->setVar('categories', $categories, false);

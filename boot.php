@@ -8,7 +8,6 @@
 
 use FriendsOfREDAXO\Snippets\Service\ReplacementService;
 use FriendsOfREDAXO\Snippets\Service\HtmlReplacementService;
-use FriendsOfREDAXO\Snippets\Service\AbbreviationService;
 use FriendsOfREDAXO\Snippets\Util\ContextDetector;
 
 // Berechtigungen registrieren
@@ -36,9 +35,6 @@ if (!rex::isBackend()) {
         // 2. HTML-Ersetzungen anwenden
         $content = HtmlReplacementService::process($content, 'frontend');
 
-        // 3. Abkürzungen kennzeichnen
-        $content = AbbreviationService::process($content, 'frontend');
-
         return $content;
     }, rex_extension::NORMAL);
 }
@@ -61,9 +57,6 @@ if (rex::isBackend()) {
 
         // 2. HTML-Ersetzungen anwenden
         $content = HtmlReplacementService::process($content, 'backend');
-
-        // 3. Abkürzungen kennzeichnen
-        $content = AbbreviationService::process($content, 'backend');
 
         return $content;
     }, rex_extension::NORMAL);
