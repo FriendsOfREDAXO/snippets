@@ -1,6 +1,7 @@
-# Snippets AddOn
+# Snippets AddOn / REDAXO CMS
 
-Eine moderne Alternative zum xoutputfilter AddOn für REDAXO CMS.
+Eine moderne Alternative zum xoutputfilter (Danke Andreas ❤️) AddOn und als Ergänzung zu Sprog (Danke Thomas ❤️). 
+Snippets können Texte sein oder kleine Code-Schnipsel die global verwendet werden können. Die Ausgabe erfolgt über den Outputfilter. 
 
 ## Übersicht
 
