@@ -66,13 +66,4 @@
         }, 1500);
     }
 
-    // Confirm-Dialoge
-    $(document).on('click', '[data-confirm]', function(e) {
-        var message = $(this).data('confirm');
-        if (!confirm(message)) {
-            e.preventDefault();
-            return false;
-        }
-    });
-
 })(jQuery);
