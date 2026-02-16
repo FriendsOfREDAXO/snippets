@@ -480,6 +480,12 @@ echo $filtered;
 - **HTML-Ersetzungen aktiv**: Frontend/Backend aktivieren
 - **Debug-Modus**: Erweiterte Fehlerausgabe
 
+### TinyMCE-Integration
+
+Das AddOn integriert sich nahtlos in den TinyMCE-Editor (AddOn `tinymce` ab Version 5).
+Es stellt ein Plugin `redaxo_snippets` zur Verfügung, mit dem Snippets bequem über einen Button oder das Menü ausgewählt und eingefügt werden können.
+Es fügt den Platzhalter `[[snippet:key]]` in den Editor ein.
+
 ### Sprog-Integration
 
 Das Snippets-AddOn ist vollständig mit **Sprog** kombinierbar. Beide AddOns ergänzen sich:

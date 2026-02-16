@@ -96,7 +96,6 @@ class SnippetService
 
         // PHP-Code in isolierter Closure ausführen (Sicherheit: begrenzter Scope)
         $executor = static function (array $SNIPPET_PARAMS, string $SNIPPET_KEY) use ($code): string {
-            \rex_response::cleanOutputBuffers();
             ob_start();
 
             try {

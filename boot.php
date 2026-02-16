@@ -86,3 +86,14 @@ if (rex_addon::get('sprog')->isAvailable()) {
         }, $content);
     }, rex_extension::LATE);
 }
+
+// TinyMCE Plugin Integration
+if (rex::isBackend() && rex::getUser() && rex_addon::get('tinymce')->isAvailable()) {
+    if (class_exists(\FriendsOfRedaxo\TinyMce\PluginRegistry::class)) {
+        \FriendsOfRedaxo\TinyMce\PluginRegistry::addPlugin(
+            'redaxo_snippets',
+            rex_url::addonAssets('snippets', 'js/tinymce-snippets.js'),
+            'redaxo_snippets'
+        );
+    }
+}
