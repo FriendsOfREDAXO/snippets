@@ -399,52 +399,6 @@ Jede HTML-Ersetzung kann eingeschränkt werden auf:
 
 ---
 
-## Abkürzungen
-
-Automatische Kennzeichnung von Abkürzungen und Akronymen mit `<abbr>`-Tags.
-
-### Beispiel
-
-**Abkürzung erstellen:**
-- Abkürzung: `HTML`
-- Ausschreibung: `HyperText Markup Language`
-- Groß-/Kleinschreibung beachten: ✅
-- Nur ganze Wörter: ✅
-
-**Vorher:**
-```html
-<p>HTML und CSS sind die Grundlagen des Webs.</p>
-```
-
-**Nachher:**
-```html
-<p><abbr title="HyperText Markup Language">HTML</abbr> und 
-<abbr title="Cascading Style Sheets">CSS</abbr> sind die Grundlagen des Webs.</p>
-```
-
-### Optionen
-
-| Option | Beschreibung |
-|--------|--------------|
-| Groß-/Kleinschreibung | Nur exakte Schreibweise ersetzen |
-| Nur ganze Wörter | Keine Teilwörter ersetzen (z.B. "API" nicht in "MyAPIClass") |
-| Sprache | Nur für bestimmte REDAXO-Sprache |
-| Priorität | Verarbeitungsreihenfolge (höher = früher) |
-
-### Ausschluss-Selektoren
-
-In den Einstellungen können Bereiche definiert werden, die von der Abkürzungs-Ersetzung ausgenommen sind:
-
-```
-a
-nav
-code
-pre
-.no-abbr
-```
-
----
-
 ## Programmierung
 
 ### SnippetService API
@@ -524,7 +478,6 @@ echo $filtered;
 
 - **Snippet-Ersetzung aktiv**: Frontend/Backend aktivieren
 - **HTML-Ersetzungen aktiv**: Frontend/Backend aktivieren
-- **Abkürzungen aktiv**: Frontend/Backend aktivieren
 - **Debug-Modus**: Erweiterte Fehlerausgabe
 
 ### Sprog-Integration
@@ -600,7 +553,6 @@ Debug-Modus aktivieren → Fehler erscheinen als HTML-Kommentare:
 | `rex_snippets_translation` | Übersetzungen |
 | `rex_snippets_category` | Kategorien |
 | `rex_snippets_html_replacement` | HTML-Ersetzungen |
-| `rex_snippets_abbreviation` | Abkürzungen |
 | `rex_snippets_log` | Audit-Log |
 
 ---
