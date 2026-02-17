@@ -568,3 +568,6 @@ Debug-Modus aktivieren → Fehler erscheinen als HTML-Kommentare:
 MIT License
 
 Entwickelt von der REDAXO-Community
+
+Basiert auf Ideen vom AddOn XOutputFilter, Danke an: [Andreas Eberhard / aesoft.de](http://aesoft.de) und [Peter Bickel / polarpixel.de](http://polarpixel.de)
+
