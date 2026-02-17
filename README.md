@@ -483,8 +483,27 @@ echo $filtered;
 ### TinyMCE-Integration
 
 Das AddOn integriert sich nahtlos in den TinyMCE-Editor (AddOn `tinymce` ab Version 5).
-Es stellt ein Plugin `redaxo_snippets` zur Verfügung, mit dem Snippets bequem über einen Button oder das Menü ausgewählt und eingefügt werden können.
-Es fügt den Platzhalter `[[snippet:key]]` in den Editor ein.
+
+#### Installation & Aktivierung
+
+Damit der Snippet-Button im Editor erscheint, muss das TinyMCE-Profil angepasst werden:
+
+1. Gehe in das **TinyMCE AddOn** -> **Profile**.
+2. Wähle das gewünschte Profil (z.B. `default`) zum Bearbeiten aus.
+3. Füge im Feld **Plugins** den Eintrag `redaxo_snippets` hinzu.
+   Beispiel: `... image link media table redaxo_snippets ...`
+4. Füge im Feld **Toolbar** den Eintrag `redaxo_snippets` an der gewünschten Stelle hinzu.
+   Beispiel: `... | link unlink | redaxo_snippets | ...`
+5. Speichere das Profil.
+
+#### Funktionsweise
+
+- Im Editor erscheint nun ein **Snippet-Icon** (Code-Symbol) in der Toolbar.
+- Klick darauf öffnet einen Dialog mit allen verfügbaren Snippets.
+- Wähle ein Snippet aus der Liste, um den Platzhalter `[[snippet:key]]` an der Cursor-Position einzufügen.
+- Wenn das Snippet Parameter unterstützt, können diese im Platzhalter ergänzt werden, z.B. `[[snippet:key|param1=wert]]`.
+
+> **Hinweis:** Nur Benutzer mit Zugriff auf das Snippets-AddOn können die Snippet-Liste im Editor sehen.
 
 ### Sprog-Integration
 
