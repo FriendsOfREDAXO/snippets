@@ -171,7 +171,7 @@ $currentCategory = $this->getVar('category');
                         <?php if ($canEditThis): ?>
                         <a href="<?= rex_url::currentBackendPage(['page' => 'snippets/edit', 'func' => 'edit', 'id' => $snippet->getId()]) ?>" 
                            class="btn btn-xs btn-default">
-                            <i class="rex-icon fa-edit"></i> <?= rex_i18n::msg('edit') ?>
+                            <i class="rex-icon fa-edit"></i> <?= rex_i18n::msg('snippets_btn_edit') ?>
                         </a>
                         <?php endif; ?>
                     </td>

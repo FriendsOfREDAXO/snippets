@@ -96,6 +96,8 @@ snippets_translation_missing = No translation available yet
 snippets_save = Save
 snippets_search = Search
 snippets_delete = Delete
+snippets_edit_btn = Edit
+snippets_btn_edit = Edit
 snippets_required = Required
 snippets_confirm_delete = Really delete
 snippets_btn_save = Save
@@ -121,10 +123,12 @@ perm_general_snippets[viewer] = Snippets: View only
 
 # Categories
 snippets_category_add = Add Category
+snippets_category_edit = Edit Category
 snippets_category_name = Name
 snippets_category_icon = Icon
 snippets_category_saved = Category has been saved
 snippets_category_deleted = Category has been deleted
+snippets_category_no_data = No categories available
 
 # Settings
 snippets_settings_title = Snippet Settings

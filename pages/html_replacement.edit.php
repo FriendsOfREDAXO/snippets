@@ -20,7 +20,8 @@ if (!PermissionService::canEdit()) {
 
 $csrf = rex_csrf_token::factory('snippets_html_replacement_edit');
 
-$id = rex_request::get('id', 'int', 0);
+// id aus GET (initialer Aufruf) ODER aus POST (nach Formular-Submit, da currentBackendPage() kein id enthält)
+$id = rex_request::request('id', 'int', 0);
 $replacement = null;
 
 // Bestehende Regel laden
@@ -40,7 +41,7 @@ if (rex_post('save', 'boolean') || rex_post('save_and_close', 'boolean')) {
         $name = rex_post('name', 'string', '');
         $description = rex_post('description', 'string', '');
         $type = rex_post('type', 'string', HtmlReplacement::TYPE_CSS_SELECTOR);
-        $searchValue = rex_post('search_value', 'string', '');
+        $searchValue = trim(rex_post('search_value', 'string', ''));
         $replacementContent = rex_post('replacement', 'string', '');
         $position = rex_post('position', 'string', HtmlReplacement::POSITION_REPLACE);
         $scopeContext = rex_post('scope_context', 'string', HtmlReplacement::CONTEXT_FRONTEND);

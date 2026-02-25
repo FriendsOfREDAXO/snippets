@@ -25,41 +25,38 @@ if (rex::isBackend() && null !== rex::getUser()) {
 // Frontend: Snippet-Replacement
 if (!rex::isBackend()) {
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
-        $content = $ep->getSubject();
-
-        // 1. Snippet-Keys ersetzen
-        $content = ReplacementService::replace($content, [
+        return ReplacementService::replace($ep->getSubject(), [
             'clang_id' => rex_clang::getCurrentId(),
         ]);
-
-        // 2. HTML-Ersetzungen anwenden
-        $content = HtmlReplacementService::process($content, 'frontend');
-
-        return $content;
     }, rex_extension::NORMAL);
+
+    // HTML-Ersetzungen immer als letzter Filter ausführen
+    rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
+        return HtmlReplacementService::process($ep->getSubject(), 'frontend');
+    }, rex_extension::LATE);
 }
 
 // Backend: Snippet-Replacement (nur in sicheren Kontexten)
 if (rex::isBackend()) {
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
-        // Prüfen, ob wir uns in einem Edit-Kontext befinden
         if (ContextDetector::isEditContext()) {
             return $ep->getSubject();
         }
 
-        $content = $ep->getSubject();
-
-        // 1. Snippet-Keys ersetzen
-        $content = ReplacementService::replace($content, [
+        return ReplacementService::replace($ep->getSubject(), [
             'context' => 'backend',
             'clang_id' => rex_clang::getCurrentId(),
         ]);
-
-        // 2. HTML-Ersetzungen anwenden
-        $content = HtmlReplacementService::process($content, 'backend');
-
-        return $content;
     }, rex_extension::NORMAL);
+
+    // HTML-Ersetzungen immer als letzter Filter ausführen
+    rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
+        if (ContextDetector::isEditContext()) {
+            return $ep->getSubject();
+        }
+
+        return HtmlReplacementService::process($ep->getSubject(), 'backend');
+    }, rex_extension::LATE);
 }
 
 // Sprog-Integration (falls Sprog aktiv ist)

@@ -97,6 +97,8 @@ snippets_translation_missing = Noch keine Übersetzung vorhanden
 snippets_save = Speichern
 snippets_search = Suchen
 snippets_delete = Löschen
+snippets_edit_btn = Bearbeiten
+snippets_btn_edit = Bearbeiten
 snippets_required = Pflichtfeld
 snippets_confirm_delete = Wirklich löschen
 snippets_btn_save = Speichern
@@ -122,10 +124,12 @@ perm_general_snippets[viewer] = Snippets: Nur ansehen
 
 # Kategorien
 snippets_category_add = Kategorie hinzufügen
+snippets_category_edit = Kategorie bearbeiten
 snippets_category_name = Name
 snippets_category_icon = Icon
 snippets_category_saved = Kategorie wurde gespeichert
 snippets_category_deleted = Kategorie wurde gelöscht
+snippets_category_no_data = Keine Kategorien vorhanden
 
 # Einstellungen
 snippets_settings_title = Snippet-Einstellungen

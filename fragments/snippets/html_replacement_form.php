@@ -191,7 +191,7 @@ $status = rex_post('status', 'boolean', $replacement?->isActive() ?? true);
                 <button type="submit" name="save_and_close" value="1" class="btn btn-apply">
                     <i class="rex-icon rex-icon-apply"></i> <?= $addon->i18n('snippets_save_and_close') ?>
                 </button>
-                <a href="<?= rex_url::currentBackendPage(['func' => '']) ?>" class="btn btn-abort">
+                <a href="<?= rex_url::backendPage('snippets/html_replacement') ?>" class="btn btn-abort">
                     <i class="rex-icon rex-icon-abort"></i> <?= $addon->i18n('snippets_cancel') ?>
                 </a>
             </div>

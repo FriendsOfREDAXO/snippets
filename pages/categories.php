@@ -84,7 +84,7 @@ if (in_array($func, ['add', 'edit'], true)) {
     $icon = is_array($category) && isset($category['icon']) ? (string) $category['icon'] : '';
     $sortOrder = is_array($category) && isset($category['sort_order']) ? (int) $category['sort_order'] : 0;
 
-    $formTitle = 'add' === $func ? rex_i18n::msg('snippets_category_add') : rex_i18n::msg('edit');
+    $formTitle = 'add' === $func ? rex_i18n::msg('snippets_category_add') : rex_i18n::msg('snippets_category_edit');
 
     $content = '
     <form method="post" action="' . rex_url::currentBackendPage() . '">
@@ -117,7 +117,7 @@ if (in_array($func, ['add', 'edit'], true)) {
                         <i class="rex-icon rex-icon-save"></i> ' . rex_i18n::msg('snippets_save') . '
                     </button>
                     <a href="' . rex_url::currentBackendPage() . '" class="btn btn-abort">
-                        ' . rex_i18n::msg('cancel') . '
+                        ' . rex_i18n::msg('snippets_btn_cancel') . '
                     </a>
                 </div>
             </div>
@@ -151,7 +151,7 @@ $listContent = '
 if (0 === $sql->getRows()) {
     $listContent .= '
         <tr>
-            <td colspan="5" class="text-center">' . rex_i18n::msg('no_data_available') . '</td>
+            <td colspan="5" class="text-center">' . rex_i18n::msg('snippets_category_no_data') . '</td>
         </tr>';
 } else {
     for ($i = 0; $i < $sql->getRows(); ++$i) {
@@ -169,7 +169,7 @@ if (0 === $sql->getRows()) {
             <td>' . $catSort . '</td>
             <td>
                 <a href="' . rex_url::currentBackendPage(['func' => 'edit', 'id' => $catId]) . '" class="btn btn-xs btn-default">
-                    <i class="rex-icon fa-edit"></i> ' . rex_i18n::msg('edit') . '
+                    <i class="rex-icon fa-edit"></i> ' . rex_i18n::msg('snippets_btn_edit') . '
                 </a>
                 <a href="' . rex_url::currentBackendPage(['func' => 'delete', 'id' => $catId] + $csrfToken->getUrlParams()) . '" 
                    class="btn btn-xs btn-delete"
