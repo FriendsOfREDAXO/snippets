@@ -26,6 +26,7 @@ if ('save' === $func) {
         $addon->setConfig('php_execution_enabled', rex_request::post('php_execution_enabled', 'bool'));
         $addon->setConfig('sprog_abbrev_enabled', rex_request::post('sprog_abbrev_enabled', 'bool'));
         $addon->setConfig('debug_mode', rex_request::post('debug_mode', 'bool'));
+        $addon->setConfig('html_replacement_allow_snippets', rex_request::post('html_replacement_allow_snippets', 'bool'));
         $addon->setConfig('abbreviation_exclude_selectors', rex_request::post('abbreviation_exclude_selectors', 'string', ''));
 
         echo rex_view::success(rex_i18n::msg('settings_saved'));
@@ -36,6 +37,7 @@ if ('save' === $func) {
 $phpExecutionEnabled = (bool) $addon->getConfig('php_execution_enabled', true);
 $sprogAbbrevEnabled = (bool) $addon->getConfig('sprog_abbrev_enabled', true);
 $debugMode = (bool) $addon->getConfig('debug_mode', false);
+$htmlReplacementAllowSnippets = (bool) $addon->getConfig('html_replacement_allow_snippets', false);
 $abbreviationExcludeSelectors = (string) $addon->getConfig('abbreviation_exclude_selectors', "a\nnav\ncode\npre");
 
 $content = '
@@ -52,6 +54,14 @@ $content = '
                 ' . rex_i18n::msg('snippets_settings_php_execution') . '
             </label>
             <p class="help-block">' . rex_i18n::msg('snippets_settings_php_execution_notice') . '</p>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="html_replacement_allow_snippets" value="1" ' . ($htmlReplacementAllowSnippets ? 'checked' : '') . '>
+                ' . $addon->i18n('snippets_settings_html_replacement_allow_snippets') . '
+            </label>
+            <p class="help-block">' . $addon->i18n('snippets_settings_html_replacement_allow_snippets_help') . '</p>
         </div>
     </fieldset>';
 

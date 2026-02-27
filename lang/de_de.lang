@@ -140,6 +140,8 @@ snippets_settings_sprog_integration = Sprog-Integration
 snippets_settings_sprog_abbrev = Sprog-Wildcards aktivieren
 snippets_settings_php_execution = PHP-Ausführung erlauben
 snippets_settings_php_execution_notice = PHP-Code kann nur von Administratoren und Benutzern mit Berechtigung bearbeitet werden
+snippets_settings_html_replacement_allow_snippets = Snippets in HTML-Ersetzungen erlauben
+snippets_settings_html_replacement_allow_snippets_help = Wenn aktiv, werden [[snippet:...]] Platzhalter im Ersetzungs-Inhalt vor dem Einfügen aufgelöst.
 
 # Hilfe
 snippets_help_usage = Verwendung
@@ -191,6 +193,7 @@ snippets_html_replacement_search_help_html = Geben Sie den exakten HTML-Code ein
 snippets_html_replacement_search_help_regex = Regulärer Ausdruck mit Delimitern, z.B. /<h1>(.*?)<\/h1>/
 snippets_html_replacement_search_help_callback = Suchwert (HTML/Regex), dann im Ersetzungs-Feld: ClassName::methodName - Methode bekommt (string $search, string $content, HtmlReplacement $rule): string
 snippets_html_replacement_replacement = Ersetzungs-Inhalt
+snippets_html_replacement_replacement_snippet_hint = Hinweis: [[snippet:...]] wird nur aufgelöst, wenn in den Einstellungen „Snippets in HTML-Ersetzungen erlauben“ aktiviert ist.
 snippets_html_replacement_position = Position
 
 # HTML-Ersetzung Scope

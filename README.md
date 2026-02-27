@@ -22,6 +22,7 @@ Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fr
 - **Backend-Request-Pattern**: Regeln können auf konkrete Backend-URLs/Parameter eingeschränkt werden (z. B. `page=content/edit&function=add`)
 - **Mehrere URL-Pattern pro Regel**: Im Request-Pattern-Feld sind mehrere Einträge per Zeile möglich (ODER-Verknüpfung)
 - **Status/Legacy-Normalisierung**: Robustere Verarbeitung alter Status-/Scope-Werte inkl. Migration in `update.php`
+- **Optionale Snippet-Auflösung in HTML-Ersetzungen**: `[[snippet:...]]` im Ersetzungs-Inhalt können per Einstellung aktiviert werden
 
 ---
 
@@ -431,6 +432,15 @@ page=content/edit&function=add || page=content/edit&function=edit
 ```
 
 Hinweis: Die klassische Backend-Seiten-Auswahl und das Backend-Request-Pattern wirken zusammen. Wenn beide gesetzt sind, müssen beide Bedingungen passen.
+
+### Snippets in HTML-Ersetzungsinhalten
+
+Standardmäßig werden Snippet-Platzhalter im Feld **Ersetzungs-Inhalt** nicht aufgelöst. 
+Wenn gewünscht, kann dies in den Einstellungen aktiviert werden:
+
+- **Snippets → Einstellungen → „Snippets in HTML-Ersetzungen erlauben“**
+
+Dann werden Platzhalter wie `[[snippet:mein_key]]` im Ersetzungs-Inhalt vor dem Einfügen verarbeitet.
 
 ---
 

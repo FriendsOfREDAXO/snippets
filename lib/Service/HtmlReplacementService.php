@@ -13,8 +13,11 @@ use Dom\Element;
 use Dom\XPath;
 use FriendsOfREDAXO\Snippets\Domain\HtmlReplacement;
 use FriendsOfREDAXO\Snippets\Repository\HtmlReplacementRepository;
+use rex;
+use rex_addon;
 use rex_article;
 use rex_be_controller;
+use rex_clang;
 use rex_request;
 
 /**
@@ -22,6 +25,8 @@ use rex_request;
  */
 class HtmlReplacementService
 {
+    private static ?bool $allowSnippetsInHtmlReplacements = null;
+
     /**
      * Führt alle Ersetzungen aus
      */
@@ -159,6 +164,7 @@ class HtmlReplacementService
             }
 
             $replacementContent = $replacement->getReplacement();
+            $replacementContent = self::prepareReplacementContent($replacementContent);
             $position = $replacement->getPosition();
 
             // Knoten rückwärts verarbeiten um Indexprobleme zu vermeiden
@@ -281,7 +287,7 @@ class HtmlReplacementService
     private static function applyHtmlMatch(string $content, HtmlReplacement $replacement): string
     {
         $search = $replacement->getSearchValue();
-        $replace = $replacement->getReplacement();
+        $replace = self::prepareReplacementContent($replacement->getReplacement());
 
         return str_replace($search, $replace, $content);
     }
@@ -292,7 +298,7 @@ class HtmlReplacementService
     private static function applyRegex(string $content, HtmlReplacement $replacement): string
     {
         $pattern = $replacement->getSearchValue();
-        $replace = $replacement->getReplacement();
+        $replace = self::prepareReplacementContent($replacement->getReplacement());
 
         try {
             $result = preg_replace($pattern, $replace, $content);
@@ -356,5 +362,28 @@ class HtmlReplacementService
             // Bei Fehlern Original zurückgeben
             return $content;
         }
+    }
+
+    private static function prepareReplacementContent(string $replacementContent): string
+    {
+        if (!self::isSnippetReplacementEnabled()) {
+            return $replacementContent;
+        }
+
+        return ReplacementService::replace($replacementContent, [
+            'context' => rex::isBackend() ? 'backend' : 'frontend',
+            'clang_id' => rex_clang::getCurrentId(),
+        ]);
+    }
+
+    private static function isSnippetReplacementEnabled(): bool
+    {
+        if (null !== self::$allowSnippetsInHtmlReplacements) {
+            return self::$allowSnippetsInHtmlReplacements;
+        }
+
+        self::$allowSnippetsInHtmlReplacements = (bool) rex_addon::get('snippets')->getConfig('html_replacement_allow_snippets', false);
+
+        return self::$allowSnippetsInHtmlReplacements;
     }
 }

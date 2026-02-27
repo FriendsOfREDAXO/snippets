@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] – 2026-02-27
+
+### Hinzugefügt
+
+- **Backend-Request-Pattern mit Mehrfachangaben:** mehrere Pattern pro Regel per Zeile oder `||` (ODER), innerhalb eines Patterns `&` (UND)
+- **Option in Einstellungen:** „Snippets in HTML-Ersetzungen erlauben“ (`html_replacement_allow_snippets`)
+- **UI-Hinweis im Formular:** Hinweis unter „Ersetzungs-Inhalt“, dass `[[snippet:...]]` nur bei aktivierter Option aufgelöst wird
+
+### Dokumentation
+
+- **README erweitert:** neue Scope-/Request-Pattern-Syntax, Mehrfach-URL-Beispiele und Hinweis zur optionalen Snippet-Auflösung in HTML-Ersetzungen
+
 ## [1.0.2] – 2026-02-27
 
 ### Behoben
@@ -20,10 +32,6 @@
 
 ### Behoben
 
-- **HTML-Ersetzung: Editieren zeigte leere Felder** – `id` wurde nur aus GET gelesen, jedoch beim Formular-Submit per POST übertragen; `rex_request::request()` liest nun aus beiden Quellen
-- **HTML-Ersetzung: „Name existiert bereits" beim Speichern einer bestehenden Regel** – Folgefehler der fehlenden `id`, `nameExists()` schloss die eigene ID nun korrekt aus
-- **HTML-Ersetzung: Suchwert mit führenden/nachfolgenden Leerzeichen wurde nicht gefunden** – `trim()` wird jetzt beim Speichern angewendet
-- **Kategorien: `[translate:cancel]` und `[translate:no_data_available]`** – falsche Core-Keys ersetzt durch addon-eigene Keys (`snippets_btn_cancel`, `snippets_category_no_data`)
 - **Kategorien/Listing: `[translate:edit]`** – in `categories.php` und `listing.php` durch `snippets_category_edit` / `snippets_btn_edit` ersetzt
 - **HTML-Ersetzung: Abbrechen-Button** verzweigte zurück zur leeren Bearbeiten-Seite statt zur Übersicht
 - **HTML-Ersetzung: `OUTPUT_FILTER`** in separate Extension mit `rex_extension::LATE` ausgelagert, damit die HTML-Ersetzung garantiert nach allen anderen `NORMAL`-Filtern (z. B. Sprog, YRewrite) ausgeführt wird

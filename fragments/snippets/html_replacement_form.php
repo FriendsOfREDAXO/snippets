@@ -116,6 +116,7 @@ $status = rex_post('status', 'int', ($replacement?->isActive() ?? true) ? 1 : 0)
         <div class="form-group">
             <label for="replacement" class="control-label"><?= $addon->i18n('snippets_html_replacement_replacement') ?> *</label>
             <textarea class="form-control" id="replacement" name="replacement" rows="10" required><?= rex_escape($replacementContent) ?></textarea>
+            <p class="help-block"><?= $addon->i18n('snippets_html_replacement_replacement_snippet_hint') ?></p>
         </div>
     </fieldset>
 
