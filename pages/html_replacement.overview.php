@@ -129,6 +129,9 @@ if ([] !== $replacements) {
         if (null !== $replacement->getScopeBackendPages() && [] !== $replacement->getScopeBackendPages()) {
             $scopeInfo[] = count($replacement->getScopeBackendPages()) . ' Backend-Seite(n)';
         }
+        if (null !== $replacement->getScopeBackendRequestPattern() && '' !== trim($replacement->getScopeBackendRequestPattern())) {
+            $scopeInfo[] = 'Request-Pattern';
+        }
         
         $scopeDisplay = implode(' • ', $scopeInfo);
 

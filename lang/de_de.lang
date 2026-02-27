@@ -203,6 +203,8 @@ snippets_html_replacement_scope_url_pattern = URL-Pattern (Regex)
 snippets_html_replacement_scope_url_help = Z.B. /^\/news/ für alle URLs die mit /news beginnen (leer = alle)
 snippets_html_replacement_scope_backend_pages = Backend-Seiten
 snippets_html_replacement_scope_backend_help = Leer = gilt für alle Backend-Seiten (Strg/Cmd für Mehrfachauswahl)
+snippets_html_replacement_scope_backend_request_pattern = Backend-Request-Pattern
+snippets_html_replacement_scope_backend_request_help = Optional: Mehrere Pattern per Zeile (ODER) oder mit || trennen. Innerhalb eines Patterns key=value mit & verknüpfen (UND), z.B. page=content/edit&function=add.
 
 # Common
 snippets_save_and_close = Speichern und schließen

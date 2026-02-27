@@ -46,11 +46,12 @@ if (rex_post('save', 'boolean') || rex_post('save_and_close', 'boolean')) {
         $position = rex_post('position', 'string', HtmlReplacement::POSITION_REPLACE);
         $scopeContext = rex_post('scope_context', 'string', HtmlReplacement::CONTEXT_FRONTEND);
         $priority = rex_post('priority', 'int', 10);
-        $status = rex_post('status', 'boolean', true);
+        $status = rex_post('status', 'int', 1);
 
         // Scope-Arrays
         $scopeTemplates = rex_post('scope_templates', 'array', []);
         $scopeBackendPages = rex_post('scope_backend_pages', 'array', []);
+        $scopeBackendRequestPattern = rex_post('scope_backend_request_pattern', 'string', '');
         $scopeCategories = rex_post('scope_categories', 'array', []);
         $scopeUrlPattern = rex_post('scope_url_pattern', 'string', '');
 
@@ -93,10 +94,11 @@ if (rex_post('save', 'boolean') || rex_post('save_and_close', 'boolean')) {
                 'scope_context' => $scopeContext,
                 'scope_templates' => array_values(array_filter($scopeTemplates, static fn($v): bool => '' !== $v && null !== $v)),
                 'scope_backend_pages' => array_values(array_filter($scopeBackendPages, static fn($v): bool => '' !== $v && null !== $v)),
+                'scope_backend_request_pattern' => trim($scopeBackendRequestPattern),
                 'scope_categories' => array_values(array_filter($scopeCategories, static fn($v): bool => '' !== $v && null !== $v)),
                 'scope_url_pattern' => $scopeUrlPattern,
                 'priority' => $priority,
-                'status' => $status ? 1 : 0,
+                'status' => 1 === $status ? 1 : 0,
             ];
 
             if ($id > 0) {
@@ -138,16 +140,33 @@ foreach ($sql as $row) {
     $categories[(int) $row->getValue('id')] = $row->getValue('name');
 }
 
-// Backend-Seiten
-$backendPages = [
-    'structure' => 'Struktur',
-    'mediapool' => 'Medienpool',
-    'modules' => 'Module',
-    'templates' => 'Templates',
-    'users' => 'Benutzer',
-    'packages' => 'AddOns',
-    'system' => 'System',
-];
+// Backend-Seiten (hierarchisch aus Navigation aufbauen)
+$backendPages = [];
+
+/**
+ * @param array<string, rex_be_page> $pages
+ */
+$collectBackendPages = static function (array $pages, int $level = 0) use (&$collectBackendPages, &$backendPages): void {
+    foreach ($pages as $page) {
+        if ($page->isHidden()) {
+            continue;
+        }
+
+        $fullKey = trim($page->getFullKey());
+        if ('' !== $fullKey) {
+            $indent = str_repeat('— ', max(0, $level));
+            $title = html_entity_decode($page->getTitle(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $backendPages[$fullKey] = $indent . $title . ' (' . $fullKey . ')';
+        }
+
+        $subpages = $page->getSubpages();
+        if ([] !== $subpages) {
+            $collectBackendPages($subpages, $level + 1);
+        }
+    }
+};
+
+$collectBackendPages(rex_be_controller::getPages());
 
 // Formular-Fragment
 $formFragment = new rex_fragment();

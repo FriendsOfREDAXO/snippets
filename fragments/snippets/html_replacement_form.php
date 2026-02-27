@@ -30,10 +30,11 @@ $position = rex_post('position', 'string', $replacement?->getPosition() ?? HtmlR
 $scopeContext = rex_post('scope_context', 'string', $replacement?->getScopeContext() ?? HtmlReplacement::CONTEXT_FRONTEND);
 $scopeTemplates = rex_post('scope_templates', 'array', $replacement?->getScopeTemplates() ?? []);
 $scopeBackendPages = rex_post('scope_backend_pages', 'array', $replacement?->getScopeBackendPages() ?? []);
+$scopeBackendRequestPattern = rex_post('scope_backend_request_pattern', 'string', $replacement?->getScopeBackendRequestPattern() ?? '');
 $scopeCategories = rex_post('scope_categories', 'array', $replacement?->getScopeCategories() ?? []);
 $scopeUrlPattern = rex_post('scope_url_pattern', 'string', $replacement?->getScopeUrlPattern() ?? '');
 $priority = rex_post('priority', 'int', $replacement?->getPriority() ?? 10);
-$status = rex_post('status', 'boolean', $replacement?->isActive() ?? true);
+$status = rex_post('status', 'int', ($replacement?->isActive() ?? true) ? 1 : 0);
 ?>
 
 <form action="<?= rex_url::currentBackendPage() ?>" method="post" id="html-replacement-form">
@@ -57,12 +58,11 @@ $status = rex_post('status', 'boolean', $replacement?->isActive() ?? true);
 
         <!-- Status -->
         <div class="form-group">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" name="status" value="1" <?= $status ? 'checked' : '' ?>>
-                    <?= $addon->i18n('snippets_html_replacement_active') ?>
-                </label>
-            </div>
+            <label for="status" class="control-label"><?= $addon->i18n('snippets_html_replacement_active') ?></label>
+            <select class="form-control" id="status" name="status">
+                <option value="1" <?= 1 === (int) $status ? 'selected' : '' ?>><?= $addon->i18n('snippets_status_active') ?></option>
+                <option value="0" <?= 0 === (int) $status ? 'selected' : '' ?>><?= $addon->i18n('snippets_status_inactive') ?></option>
+            </select>
         </div>
 
         <!-- Priorität -->
@@ -170,7 +170,7 @@ $status = rex_post('status', 'boolean', $replacement?->isActive() ?? true);
         <!-- Backend-Seiten (nur Backend) -->
         <div class="form-group" id="scope-backend-field">
             <label for="scope_backend_pages" class="control-label"><?= $addon->i18n('snippets_html_replacement_scope_backend_pages') ?></label>
-            <select class="form-control" id="scope_backend_pages" name="scope_backend_pages[]" multiple size="8">
+            <select class="form-control selectpicker" id="scope_backend_pages" name="scope_backend_pages[]" multiple size="8" data-live-search="true" data-actions-box="true" data-selected-text-format="count > 3">
                 <?php foreach ($backend_pages as $page => $pageName): ?>
                     <option value="<?= $page ?>" <?= in_array($page, $scopeBackendPages, true) ? 'selected' : '' ?>>
                         <?= rex_escape($pageName) ?>
@@ -178,6 +178,10 @@ $status = rex_post('status', 'boolean', $replacement?->isActive() ?? true);
                 <?php endforeach; ?>
             </select>
             <p class="help-block"><?= $addon->i18n('snippets_html_replacement_scope_backend_help') ?></p>
+
+            <label for="scope_backend_request_pattern" class="control-label" style="margin-top:10px;"><?= $addon->i18n('snippets_html_replacement_scope_backend_request_pattern') ?></label>
+            <textarea class="form-control" id="scope_backend_request_pattern" name="scope_backend_request_pattern" rows="4" placeholder="page=content/edit&function=add&#10;page=mediapool/media&func=delete"><?= rex_escape($scopeBackendRequestPattern) ?></textarea>
+            <p class="help-block"><?= $addon->i18n('snippets_html_replacement_scope_backend_request_help') ?></p>
         </div>
     </fieldset>
 

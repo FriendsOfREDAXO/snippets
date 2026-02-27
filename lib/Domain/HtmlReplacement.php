@@ -23,6 +23,7 @@ class HtmlReplacement
     private string $scopeContext;
     private ?array $scopeTemplates;
     private ?array $scopeBackendPages;
+    private ?string $scopeBackendRequestPattern;
     private ?array $scopeCategories;
     private ?string $scopeUrlPattern;
     private int $priority;
@@ -80,13 +81,14 @@ class HtmlReplacement
         $instance->scopeBackendPages = !empty($data['scope_backend_pages']) 
             ? json_decode($data['scope_backend_pages'], true) 
             : null;
+        $instance->scopeBackendRequestPattern = isset($data['scope_backend_request_pattern']) ? (string) $data['scope_backend_request_pattern'] : null;
         $instance->scopeCategories = !empty($data['scope_categories']) 
             ? json_decode($data['scope_categories'], true) 
             : null;
         
         $instance->scopeUrlPattern = isset($data['scope_url_pattern']) ? (string) $data['scope_url_pattern'] : null;
         $instance->priority = (int) $data['priority'];
-        $instance->status = (bool) $data['status'];
+        $instance->status = self::parseBooleanValue($data['status'] ?? 0);
         $instance->createdate = (string) $data['createdate'];
         $instance->updatedate = (string) $data['updatedate'];
         $instance->createuser = (string) $data['createuser'];
@@ -106,6 +108,7 @@ class HtmlReplacement
     public function getScopeContext(): string { return $this->scopeContext; }
     public function getScopeTemplates(): ?array { return $this->scopeTemplates; }
     public function getScopeBackendPages(): ?array { return $this->scopeBackendPages; }
+    public function getScopeBackendRequestPattern(): ?string { return $this->scopeBackendRequestPattern; }
     public function getScopeCategories(): ?array { return $this->scopeCategories; }
     public function getScopeUrlPattern(): ?string { return $this->scopeUrlPattern; }
     public function getPriority(): int { return $this->priority; }
@@ -152,7 +155,92 @@ class HtmlReplacement
             return true; // Keine Einschränkung = gilt für alle
         }
 
-        return in_array($page, $this->scopeBackendPages, true);
+        $normalizedPage = trim(strtolower($page), '/');
+        if ('' === $normalizedPage) {
+            return false;
+        }
+
+        foreach ($this->scopeBackendPages as $allowedPage) {
+            if (!is_string($allowedPage) || '' === trim($allowedPage)) {
+                continue;
+            }
+
+            $normalizedAllowedPage = trim(strtolower($allowedPage), '/');
+            if ($normalizedAllowedPage === $normalizedPage) {
+                return true;
+            }
+
+            if (str_starts_with($normalizedPage, $normalizedAllowedPage . '/')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Prüft ob Regel auf aktuellen Backend-Request passt.
+     *
+     * Pattern kann enthalten:
+     * - Freitext (Teilstring-Match)
+     * - key=value Paare getrennt durch & (z.B. page=content/edit&function=add)
+     */
+    public function appliesToBackendRequest(string $requestUri, array $queryParams): bool
+    {
+        if (null === $this->scopeBackendRequestPattern || '' === trim($this->scopeBackendRequestPattern)) {
+            return true;
+        }
+
+        $patternGroups = preg_split('/\r\n|\r|\n|\|\|/', $this->scopeBackendRequestPattern) ?: [];
+
+        foreach ($patternGroups as $patternGroup) {
+            $patternGroup = trim($patternGroup);
+            if ('' === $patternGroup) {
+                continue;
+            }
+
+            if (self::matchesSingleBackendRequestPattern($patternGroup, $requestUri, $queryParams)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function matchesSingleBackendRequestPattern(string $pattern, string $requestUri, array $queryParams): bool
+    {
+        // key=value&key2=value2 Syntax
+        if (str_contains($pattern, '=')) {
+            $requiredParts = explode('&', $pattern);
+            foreach ($requiredParts as $requiredPart) {
+                $requiredPart = trim($requiredPart);
+                if ('' === $requiredPart || !str_contains($requiredPart, '=')) {
+                    continue;
+                }
+
+                [$key, $value] = explode('=', $requiredPart, 2);
+                $key = trim($key);
+                $value = trim($value);
+
+                if ('' === $key) {
+                    continue;
+                }
+
+                $actualValue = isset($queryParams[$key]) ? (string) $queryParams[$key] : null;
+                if (null === $actualValue) {
+                    return false;
+                }
+
+                if ('' !== $value && $actualValue !== $value) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Fallback: Teilstring auf komplette URI
+        return str_contains($requestUri, $pattern);
     }
 
     /**
@@ -216,5 +304,23 @@ class HtmlReplacement
             self::CONTEXT_BACKEND => 'Backend',
             self::CONTEXT_BOTH => 'Frontend & Backend',
         ];
+    }
+
+    private static function parseBooleanValue(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (int) $value === 1;
+        }
+
+        if (is_string($value)) {
+            $normalized = trim($value, " \t\n\r\0\x0B|");
+            return '1' === $normalized;
+        }
+
+        return false;
     }
 }

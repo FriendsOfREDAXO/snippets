@@ -14,6 +14,15 @@ Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fr
 - **Scope-Kontrolle** – Templates, Kategorien, URLs, Backend-Seiten
 - **Berechtigungssystem** – Admin, Editor, Viewer Rollen
 
+### Neu in Version 1.0.2
+
+- **Backend-Scope verbessert**: Backend-Seiten-Matching erkennt nun auch Unterseiten zuverlässig (z. B. `mediapool` trifft `mediapool/media`)
+- **Dynamische Backend-Seitenliste**: Alle Core- und AddOn-Seiten werden hierarchisch zur Auswahl angeboten
+- **Selectpicker-UI**: Backend-Seiten-Auswahl mit Suche und Mehrfachauswahl
+- **Backend-Request-Pattern**: Regeln können auf konkrete Backend-URLs/Parameter eingeschränkt werden (z. B. `page=content/edit&function=add`)
+- **Mehrere URL-Pattern pro Regel**: Im Request-Pattern-Feld sind mehrere Einträge per Zeile möglich (ODER-Verknüpfung)
+- **Status/Legacy-Normalisierung**: Robustere Verarbeitung alter Status-/Scope-Werte inkl. Migration in `update.php`
+
 ---
 
 ## Installation
@@ -396,6 +405,32 @@ Jede HTML-Ersetzung kann eingeschränkt werden auf:
 - **Kategorien**: Nur bestimmte Kategorien mit/ohne Unterkategorien (Frontend)
 - **URL-Pattern**: Regex für URL-Matching (Frontend)
 - **Backend-Seiten**: Nur bestimmte Backend-Seiten
+- **Backend-Request-Pattern**: Optionaler Filter auf konkrete Backend-Requests inkl. Query-Parameter
+
+### Backend-Request-Pattern (Backend)
+
+Mit diesem Feld lässt sich eine Regel sehr gezielt auf einzelne Backend-Requests begrenzen.
+
+- **UND innerhalb einer Zeile**: Parameter mit `&` verknüpfen
+- **ODER zwischen mehreren Varianten**: Jede Zeile ist ein eigenes Pattern
+- **Alternativ ODER mit `||`** in einer Zeile
+- **Ohne `=`**: Teilstring-Match auf die komplette Request-URL
+
+Beispiele:
+
+```text
+page=content/edit&function=add
+page=content/edit&function=edit
+page=mediapool/media
+```
+
+oder in einer Zeile:
+
+```text
+page=content/edit&function=add || page=content/edit&function=edit
+```
+
+Hinweis: Die klassische Backend-Seiten-Auswahl und das Backend-Request-Pattern wirken zusammen. Wenn beide gesetzt sind, müssen beide Bedingungen passen.
 
 ---
 
@@ -560,6 +595,13 @@ Snippets werden **nicht ersetzt** in:
 2. **Scope prüfen**: Template/Kategorie/URL stimmen?
 3. **Selektor testen**: CSS-Selektor korrekt?
 4. **Debug aktivieren**: In Einstellungen aktivieren
+
+### Backend-Regel greift nicht wie erwartet
+
+1. **Backend-Seite prüfen**: Bei Unterseiten ggf. den übergeordneten Key oder die konkrete Unterseite wählen
+2. **Request-Pattern prüfen**: Schreibweise exakt, z. B. `function=add` vs. `func=add`
+3. **Mehrere URLs**: Je URL eine eigene Zeile oder mit `||` trennen
+4. **AddOn-Update ausführen**: Nach Update auf 1.0.2 sicherstellen, dass `update.php` gelaufen ist
 
 ### PHP-Fehler anzeigen
 

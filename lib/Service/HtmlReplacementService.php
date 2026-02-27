@@ -14,6 +14,7 @@ use Dom\XPath;
 use FriendsOfREDAXO\Snippets\Domain\HtmlReplacement;
 use FriendsOfREDAXO\Snippets\Repository\HtmlReplacementRepository;
 use rex_article;
+use rex_be_controller;
 use rex_request;
 
 /**
@@ -86,8 +87,22 @@ class HtmlReplacementService
 
             // Backend: Seiten-Check
             if ($context === HtmlReplacement::CONTEXT_BACKEND) {
-                $page = rex_request::get('page', 'string', '');
-                if ($page !== '' && !$replacement->appliesToBackendPage($page)) {
+                $page = (string) rex_be_controller::getCurrentPage();
+                if ('' === $page) {
+                    $page = rex_request::get('page', 'string', '');
+                }
+
+                if (!$replacement->appliesToBackendPage($page)) {
+                    continue;
+                }
+
+                $requestUri = rex_server('REQUEST_URI', 'string', '');
+                $queryParams = [];
+                $queryString = parse_url($requestUri, PHP_URL_QUERY);
+                if (is_string($queryString) && '' !== $queryString) {
+                    parse_str($queryString, $queryParams);
+                }
+                if (!$replacement->appliesToBackendRequest($requestUri, $queryParams)) {
                     continue;
                 }
             }

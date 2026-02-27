@@ -25,6 +25,7 @@ rex_sql_table::get(rex::getTable('snippets_html_replacement'))
     ->ensureColumn(new rex_sql_column('scope_context', 'varchar(20)', false, 'frontend'))
     ->ensureColumn(new rex_sql_column('scope_templates', 'text', true))
     ->ensureColumn(new rex_sql_column('scope_backend_pages', 'text', true))
+    ->ensureColumn(new rex_sql_column('scope_backend_request_pattern', 'text', true))
     ->ensureColumn(new rex_sql_column('scope_categories', 'text', true))
     ->ensureColumn(new rex_sql_column('scope_url_pattern', 'text', true))
     ->ensureColumn(new rex_sql_column('priority', 'int(11)', false, '10'))
@@ -33,3 +34,64 @@ rex_sql_table::get(rex::getTable('snippets_html_replacement'))
     ->ensureIndex(new rex_sql_index('status', ['status']))
     ->ensureIndex(new rex_sql_index('priority', ['priority']))
     ->ensure();
+
+// Legacy-Daten normalisieren (Status + Backend-Seiten-Scope)
+$sql = rex_sql::factory();
+$sql->setQuery('SELECT id, status, scope_backend_pages, scope_backend_request_pattern FROM ' . rex::getTable('snippets_html_replacement'));
+
+for ($i = 0; $i < $sql->getRows(); ++$i) {
+    $id = (int) $sql->getValue('id');
+    $rawStatus = $sql->getValue('status');
+    $rawBackendPages = $sql->getValue('scope_backend_pages');
+    $rawBackendRequestPattern = $sql->getValue('scope_backend_request_pattern');
+
+    $normalizedStatus = 0;
+    if (is_bool($rawStatus)) {
+        $normalizedStatus = $rawStatus ? 1 : 0;
+    } elseif (is_numeric($rawStatus)) {
+        $normalizedStatus = 1 === (int) $rawStatus ? 1 : 0;
+    } elseif (is_string($rawStatus)) {
+        $statusValue = trim($rawStatus, " \t\n\r\0\x0B|");
+        $normalizedStatus = '1' === $statusValue ? 1 : 0;
+    }
+
+    $normalizedBackendPages = [];
+    if (is_string($rawBackendPages) && '' !== trim($rawBackendPages)) {
+        $decodedPages = json_decode($rawBackendPages, true);
+
+        if (is_array($decodedPages)) {
+            $pageCandidates = $decodedPages;
+        } else {
+            $pageCandidates = preg_split('/[\r\n,;|]+/', $rawBackendPages) ?: [];
+        }
+
+        foreach ($pageCandidates as $pageCandidate) {
+            if (!is_string($pageCandidate)) {
+                continue;
+            }
+
+            $normalizedPage = trim(strtolower($pageCandidate), " \t\n\r\0\x0B/|");
+            if ('' !== $normalizedPage) {
+                $normalizedBackendPages[] = $normalizedPage;
+            }
+        }
+
+        $normalizedBackendPages = array_values(array_unique($normalizedBackendPages));
+    }
+
+    $encodedBackendPages = [] === $normalizedBackendPages ? null : json_encode($normalizedBackendPages);
+    $normalizedBackendRequestPattern = is_string($rawBackendRequestPattern) ? trim($rawBackendRequestPattern) : null;
+    if ('' === $normalizedBackendRequestPattern) {
+        $normalizedBackendRequestPattern = null;
+    }
+
+    $updateSql = rex_sql::factory();
+    $updateSql->setTable(rex::getTable('snippets_html_replacement'));
+    $updateSql->setWhere(['id' => $id]);
+    $updateSql->setValue('status', $normalizedStatus);
+    $updateSql->setValue('scope_backend_pages', $encodedBackendPages);
+    $updateSql->setValue('scope_backend_request_pattern', $normalizedBackendRequestPattern);
+    $updateSql->update();
+
+    $sql->next();
+}
