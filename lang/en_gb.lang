@@ -206,7 +206,8 @@ snippets_html_replacement_scope_url_help = E.g. /^\/news/ for all URLs starting 
 snippets_html_replacement_scope_backend_pages = Backend Pages
 snippets_html_replacement_scope_backend_help = Empty = applies to all backend pages (Ctrl/Cmd for multiple selection)
 snippets_html_replacement_scope_backend_request_pattern = Backend Request Pattern
-snippets_html_replacement_scope_backend_request_help = Optional: Separate multiple patterns by line (OR) or with ||. Within one pattern, combine key=value pairs with & (AND), e.g. page=content/edit&function=add.
+snippets_html_replacement_scope_backend_request_help = Optional: Separate multiple patterns by line (OR) or with ||. Within one pattern, combine key=value pairs with & (AND). Values are matched as substrings, e.g. page=content/edit also matches page=content/edit&article_id=1.
+snippets_html_replacement_scope_backend_matching_help = If backend pages and request pattern are both set, matching either condition is sufficient (OR).
 
 # Common
 snippets_save_and_close = Save and close

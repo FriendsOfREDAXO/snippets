@@ -20,6 +20,7 @@ if (rex::isBackend() && null !== rex::getUser()) {
 // Assets im Backend laden
 if (rex::isBackend() && null !== rex::getUser()) {
     rex_view::addJsFile(rex_url::addonAssets('snippets', 'snippets.js'));
+    rex_view::addCssFile(rex_url::addonAssets('snippets', 'snippets.css'));
 }
 
 // Frontend: Snippet-Replacement
@@ -51,11 +52,16 @@ if (rex::isBackend()) {
 
     // HTML-Ersetzungen immer als letzter Filter ausführen
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
-        if (ContextDetector::isEditContext()) {
+        $currentPage = (string) rex_be_controller::getCurrentPage();
+        if ('' !== $currentPage && str_starts_with($currentPage, 'snippets/')) {
             return $ep->getSubject();
         }
 
-        return HtmlReplacementService::process($ep->getSubject(), 'backend');
+        return HtmlReplacementService::process(
+            $ep->getSubject(),
+            'backend',
+            ContextDetector::isEditContext()
+        );
     }, rex_extension::LATE);
 }
 

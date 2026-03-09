@@ -9,12 +9,29 @@ use FriendsOfREDAXO\Snippets\Domain\Snippet;
 
 /** @var array<int, Snippet> $snippets */
 $snippets = $this->getVar('snippets');
-/** @var array<int, string> $categories */
+/** @var array<int, array{name: string, icon: string}> $categories */
 $categories = $this->getVar('categories', []);
 $can_edit = $this->getVar('can_edit');
 $can_edit_php = $this->getVar('can_edit_php');
 $search = $this->getVar('search');
 $currentCategory = $this->getVar('category');
+
+$normalizeIconClass = static function (string $icon): string {
+    $icon = trim($icon);
+    if ('' === $icon) {
+        return '';
+    }
+
+    if (str_contains($icon, 'fa ')) {
+        return trim($icon);
+    }
+
+    if (str_starts_with($icon, 'fa-')) {
+        return 'fa ' . $icon;
+    }
+
+    return 'fa fa-' . ltrim($icon, '-');
+};
 
 ?>
 
@@ -41,10 +58,18 @@ $currentCategory = $this->getVar('category');
                     <div class="col-md-3">
                         <div class="form-group">
                             <label><?= rex_i18n::msg('snippets_filter_category') ?></label>
-                            <select class="form-control" name="category">
+                            <select class="form-control selectpicker" name="category" data-live-search="true" data-size="10">
                                 <option value="0"><?= rex_i18n::msg('snippets_all') ?></option>
-                                <?php foreach ($categories as $catId => $catName): ?>
-                                <option value="<?= $catId ?>" <?= (int) $currentCategory === $catId ? 'selected' : '' ?>>
+                                <?php foreach ($categories as $catId => $categoryData): ?>
+                                <?php
+                                $catName = $categoryData['name'] ?? '';
+                                $catIcon = $categoryData['icon'] ?? '';
+                                $normalizedIconClass = $normalizeIconClass($catIcon);
+                                $optionContent = '' !== $normalizedIconClass
+                                    ? '<i class="rex-icon ' . rex_escape($normalizedIconClass) . '"></i> ' . rex_escape($catName)
+                                    : rex_escape($catName);
+                                ?>
+                                <option value="<?= $catId ?>" data-content="<?= rex_escape($optionContent) ?>" <?= (int) $currentCategory === $catId ? 'selected' : '' ?>>
                                     <?= rex_escape($catName) ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -117,7 +142,14 @@ $currentCategory = $this->getVar('category');
                         <?php
                         $catId = $snippet->getCategoryId();
                         if ($catId && isset($categories[$catId])) {
-                            echo '<span class="label label-default">' . rex_escape($categories[$catId]) . '</span>';
+                            $catName = $categories[$catId]['name'] ?? '';
+                            $catIcon = $categories[$catId]['icon'] ?? '';
+                            $normalizedIconClass = $normalizeIconClass($catIcon);
+                            echo '<span class="label label-default">';
+                            if ('' !== $normalizedIconClass) {
+                                echo '<i class="rex-icon ' . rex_escape($normalizedIconClass) . '"></i> ';
+                            }
+                            echo rex_escape($catName) . '</span>';
                         }
                         ?>
                     </td>

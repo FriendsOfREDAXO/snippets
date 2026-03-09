@@ -171,7 +171,7 @@ $status = rex_post('status', 'int', ($replacement?->isActive() ?? true) ? 1 : 0)
         <!-- Backend-Seiten (nur Backend) -->
         <div class="form-group" id="scope-backend-field">
             <label for="scope_backend_pages" class="control-label"><?= $addon->i18n('snippets_html_replacement_scope_backend_pages') ?></label>
-            <select class="form-control selectpicker" id="scope_backend_pages" name="scope_backend_pages[]" multiple size="8" data-live-search="true" data-actions-box="true" data-selected-text-format="count > 3">
+            <select class="form-control selectpicker snippets-backend-pages-select" id="scope_backend_pages" name="scope_backend_pages[]" multiple size="8" data-live-search="true" data-actions-box="true" data-selected-text-format="count > 3" data-size="10">
                 <?php foreach ($backend_pages as $page => $pageName): ?>
                     <option value="<?= $page ?>" <?= in_array($page, $scopeBackendPages, true) ? 'selected' : '' ?>>
                         <?= rex_escape($pageName) ?>
@@ -181,8 +181,9 @@ $status = rex_post('status', 'int', ($replacement?->isActive() ?? true) ? 1 : 0)
             <p class="help-block"><?= $addon->i18n('snippets_html_replacement_scope_backend_help') ?></p>
 
             <label for="scope_backend_request_pattern" class="control-label" style="margin-top:10px;"><?= $addon->i18n('snippets_html_replacement_scope_backend_request_pattern') ?></label>
-            <textarea class="form-control" id="scope_backend_request_pattern" name="scope_backend_request_pattern" rows="4" placeholder="page=content/edit&function=add&#10;page=mediapool/media&func=delete"><?= rex_escape($scopeBackendRequestPattern) ?></textarea>
+            <textarea class="form-control" id="scope_backend_request_pattern" name="scope_backend_request_pattern" rows="5" placeholder="page=content/edit&function=add&#10;page=content/edit&function=edit&#10;page=content/edit&#10;func=delete"><?= rex_escape($scopeBackendRequestPattern) ?></textarea>
             <p class="help-block"><?= $addon->i18n('snippets_html_replacement_scope_backend_request_help') ?></p>
+            <p class="help-block"><?= $addon->i18n('snippets_html_replacement_scope_backend_matching_help') ?></p>
         </div>
     </fieldset>
 

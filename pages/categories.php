@@ -154,18 +154,36 @@ if (0 === $sql->getRows()) {
             <td colspan="5" class="text-center">' . rex_i18n::msg('snippets_category_no_data') . '</td>
         </tr>';
 } else {
+    $normalizeIconClass = static function (string $icon): string {
+        $icon = trim($icon);
+        if ('' === $icon) {
+            return '';
+        }
+
+        if (str_contains($icon, 'fa ')) {
+            return trim($icon);
+        }
+
+        if (str_starts_with($icon, 'fa-')) {
+            return 'fa ' . $icon;
+        }
+
+        return 'fa fa-' . ltrim($icon, '-');
+    };
+
     for ($i = 0; $i < $sql->getRows(); ++$i) {
         $catId = (int) $sql->getValue('id');
         $catName = rex_escape((string) $sql->getValue('name'));
-        $catIcon = (string) $sql->getValue('icon');
+        $catIcon = trim((string) $sql->getValue('icon'));
         $catSort = (int) $sql->getValue('sort_order');
-        $hasIcon = '' !== $catIcon;
+        $normalizedIconClass = $normalizeIconClass($catIcon);
+        $hasIcon = '' !== $normalizedIconClass;
 
         $listContent .= '
         <tr>
             <td>' . $catId . '</td>
             <td>' . $catName . '</td>
-            <td>' . ($hasIcon ? '<i class="rex-icon ' . rex_escape($catIcon) . '"></i> ' . rex_escape($catIcon) : '-') . '</td>
+            <td>' . ($hasIcon ? '<i class="rex-icon ' . rex_escape($normalizedIconClass) . '"></i> ' . rex_escape($catIcon) : '-') . '</td>
             <td>' . $catSort . '</td>
             <td>
                 <a href="' . rex_url::currentBackendPage(['func' => 'edit', 'id' => $catId]) . '" class="btn btn-xs btn-default">

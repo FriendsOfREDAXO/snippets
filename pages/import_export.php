@@ -59,7 +59,10 @@ if ('import' === $action && $csrfToken->isValid()) {
     $overwrite = rex_request('overwrite', 'bool', false);
 
     // Datei-Upload prüfen
-    $file = rex_files('import_file', ['tmp_name' => '', 'error' => UPLOAD_ERR_NO_FILE]);
+    $file = rex_files('import_file', 'array');
+    if (!is_array($file)) {
+        $file = ['tmp_name' => '', 'error' => UPLOAD_ERR_NO_FILE];
+    }
 
     if (UPLOAD_ERR_OK !== $file['error']) {
         $error = match ($file['error']) {

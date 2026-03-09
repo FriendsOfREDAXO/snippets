@@ -14,15 +14,14 @@ Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fr
 - **Scope-Kontrolle** – Templates, Kategorien, URLs, Backend-Seiten
 - **Berechtigungssystem** – Admin, Editor, Viewer Rollen
 
-### Neu in Version 1.0.2
+### Neu in Version 1.2.0
 
-- **Backend-Scope verbessert**: Backend-Seiten-Matching erkennt nun auch Unterseiten zuverlässig (z. B. `mediapool` trifft `mediapool/media`)
-- **Dynamische Backend-Seitenliste**: Alle Core- und AddOn-Seiten werden hierarchisch zur Auswahl angeboten
-- **Selectpicker-UI**: Backend-Seiten-Auswahl mit Suche und Mehrfachauswahl
-- **Backend-Request-Pattern**: Regeln können auf konkrete Backend-URLs/Parameter eingeschränkt werden (z. B. `page=content/edit&function=add`)
-- **Mehrere URL-Pattern pro Regel**: Im Request-Pattern-Feld sind mehrere Einträge per Zeile möglich (ODER-Verknüpfung)
-- **Status/Legacy-Normalisierung**: Robustere Verarbeitung alter Status-/Scope-Werte inkl. Migration in `update.php`
-- **Optionale Snippet-Auflösung in HTML-Ersetzungen**: `[[snippet:...]]` im Ersetzungs-Inhalt können per Einstellung aktiviert werden
+- **Import-Fix**: JSON-Import auf der Import/Export-Seite verarbeitet Datei-Uploads wieder robust
+- **HTML-Replacement-Import/Export vollständig**: `scope_backend_request_pattern` wird jetzt mit exportiert und importiert
+- **Backend-Scope-Logik präzisiert**: Backend-Seiten und Backend-Request-Pattern werden kombiniert (ODER, sobald beide gesetzt sind)
+- **Request-Pattern flexibler**: `key=value` vergleicht Werte als Teilstring, z. B. `page=content/edit` trifft auch `page=content/edit&article_id=1`
+- **Edit-Kontexte sicherer**: HTML-Ersetzungen können im Backend-Edit-Kontext laufen, formularnahe Bereiche bleiben geschützt
+- **Kategorien mit Icons in UI**: Icons werden in Kategorien-Liste sowie in Kategorie-Selects der Snippet-Masken/Filter angezeigt
 
 ---
 
@@ -416,12 +415,15 @@ Mit diesem Feld lässt sich eine Regel sehr gezielt auf einzelne Backend-Request
 - **ODER zwischen mehreren Varianten**: Jede Zeile ist ein eigenes Pattern
 - **Alternativ ODER mit `||`** in einer Zeile
 - **Ohne `=`**: Teilstring-Match auf die komplette Request-URL
+- **Mit `key=value`**: Teilstring-Match auf den Parameterwert (nicht nur exakte Gleichheit)
 
 Beispiele:
 
 ```text
 page=content/edit&function=add
 page=content/edit&function=edit
+page=content/edit
+func=delete
 page=mediapool/media
 ```
 
@@ -431,7 +433,7 @@ oder in einer Zeile:
 page=content/edit&function=add || page=content/edit&function=edit
 ```
 
-Hinweis: Die klassische Backend-Seiten-Auswahl und das Backend-Request-Pattern wirken zusammen. Wenn beide gesetzt sind, müssen beide Bedingungen passen.
+Hinweis: Die klassische Backend-Seiten-Auswahl und das Backend-Request-Pattern wirken zusammen. Wenn beide gesetzt sind, reicht ein Treffer in einer der beiden Bedingungen.
 
 ### Snippets in HTML-Ersetzungsinhalten
 
@@ -609,9 +611,9 @@ Snippets werden **nicht ersetzt** in:
 ### Backend-Regel greift nicht wie erwartet
 
 1. **Backend-Seite prüfen**: Bei Unterseiten ggf. den übergeordneten Key oder die konkrete Unterseite wählen
-2. **Request-Pattern prüfen**: Schreibweise exakt, z. B. `function=add` vs. `func=add`
+2. **Request-Pattern prüfen**: Parameternamen müssen stimmen, z. B. `function=add` vs. `func=add` (Werte dürfen Teilstrings sein)
 3. **Mehrere URLs**: Je URL eine eigene Zeile oder mit `||` trennen
-4. **AddOn-Update ausführen**: Nach Update auf 1.0.2 sicherstellen, dass `update.php` gelaufen ist
+4. **Kombinationslogik beachten**: Bei gesetzten Backend-Seiten und Request-Pattern reicht ein Treffer in einer Bedingung
 
 ### PHP-Fehler anzeigen
 

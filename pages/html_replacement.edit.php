@@ -155,8 +155,7 @@ $collectBackendPages = static function (array $pages, int $level = 0) use (&$col
         $fullKey = trim($page->getFullKey());
         if ('' !== $fullKey) {
             $indent = str_repeat('— ', max(0, $level));
-            $title = html_entity_decode($page->getTitle(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $backendPages[$fullKey] = $indent . $title . ' (' . $fullKey . ')';
+            $backendPages[$fullKey] = $indent . $fullKey;
         }
 
         $subpages = $page->getSubpages();

@@ -209,15 +209,15 @@ class HtmlReplacement
 
     private static function matchesSingleBackendRequestPattern(string $pattern, string $requestUri, array $queryParams): bool
     {
-        // key=value&key2=value2 Syntax
-        if (str_contains($pattern, '=')) {
-            $requiredParts = explode('&', $pattern);
-            foreach ($requiredParts as $requiredPart) {
-                $requiredPart = trim($requiredPart);
-                if ('' === $requiredPart || !str_contains($requiredPart, '=')) {
-                    continue;
-                }
+        $requiredParts = explode('&', $pattern);
 
+        foreach ($requiredParts as $requiredPart) {
+            $requiredPart = trim($requiredPart);
+            if ('' === $requiredPart) {
+                continue;
+            }
+
+            if (str_contains($requiredPart, '=')) {
                 [$key, $value] = explode('=', $requiredPart, 2);
                 $key = trim($key);
                 $value = trim($value);
@@ -226,21 +226,30 @@ class HtmlReplacement
                     continue;
                 }
 
-                $actualValue = isset($queryParams[$key]) ? (string) $queryParams[$key] : null;
+                $actualValue = isset($queryParams[$key]) && !is_array($queryParams[$key])
+                    ? (string) $queryParams[$key]
+                    : null;
+
                 if (null === $actualValue) {
+                    if (!str_contains(strtolower($requestUri), strtolower($requiredPart))) {
+                        return false;
+                    }
+                    continue;
+                }
+
+                if ('' !== $value && !str_contains(strtolower($actualValue), strtolower($value))) {
                     return false;
                 }
 
-                if ('' !== $value && $actualValue !== $value) {
-                    return false;
-                }
+                continue;
             }
 
-            return true;
+            if (!str_contains(strtolower($requestUri), strtolower($requiredPart))) {
+                return false;
+            }
         }
 
-        // Fallback: Teilstring auf komplette URI
-        return str_contains($requestUri, $pattern);
+        return true;
     }
 
     /**

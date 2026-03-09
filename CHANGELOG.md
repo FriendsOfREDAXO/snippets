@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.2.0] – 2026-03-09
+
+### Behoben
+
+- **Import/Export (Import-Upload):** TypeError beim Dateiupload behoben; Import verarbeitet Upload-Feld wieder robust
+- **Import/Export (HTML-Ersetzungen):** `scope_backend_request_pattern` wird nun korrekt mit exportiert/importiert
+- **Backend-Scope-Matching:** Kombination aus Backend-Seiten und Backend-Request-Pattern wurde vereinheitlicht; bei gesetzten beiden Scopes reicht ein Treffer in einer Bedingung
+- **Backend-Request-Pattern:** `key=value`-Abgleich unterstützt Teilstring-Matching für Parameterwerte (z. B. `page=content/edit` matcht auch `page=content/edit&article_id=1`)
+- **Backend Edit-Kontexte:** HTML-Ersetzungen können im Edit-Kontext angewendet werden, formularnahe Bereiche bleiben geschützt
+
+### Verbessert
+
+- **Kategorien-UI:** Kategorie-Icons werden in Kategorienliste, Kategorie-Select im Snippet-Formular und Kategorie-Filter in der Übersicht angezeigt
+- **HTML-Ersetzungsmaske:** Backend-Seiten-Auswahlhöhe begrenzt; zusätzliche Hilfetexte und Beispiele für Backend-Request-Pattern direkt in der Maske
+
+### Dokumentation
+
+- **README aktualisiert:** Verhalten von Backend-Seiten vs. Backend-Request-Pattern präzisiert (Kombination/Matching-Logik), neue Pattern-Beispiele ergänzt
+- **Release-Version erhöht:** AddOn-Version auf `1.2.0` angehoben
+
 ## [1.1.0] – 2026-02-27
 
 ### Hinzugefügt

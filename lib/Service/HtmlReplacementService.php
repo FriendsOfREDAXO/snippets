@@ -30,7 +30,7 @@ class HtmlReplacementService
     /**
      * Führt alle Ersetzungen aus
      */
-    public static function process(string $content, string $context): string
+    public static function process(string $content, string $context, bool $protectFormValues = false): string
     {
         $replacements = HtmlReplacementRepository::findActiveForContext($context);
         
@@ -47,7 +47,7 @@ class HtmlReplacementService
 
         // Nach Priorität sortiert ausführen
         foreach ($applicableReplacements as $replacement) {
-            $content = self::applyReplacement($content, $replacement);
+            $content = self::applyReplacement($content, $replacement, $protectFormValues);
         }
 
         return $content;
@@ -90,16 +90,14 @@ class HtmlReplacementService
                 }
             }
 
-            // Backend: Seiten-Check
+            // Backend: Seiten-/Request-Check
             if ($context === HtmlReplacement::CONTEXT_BACKEND) {
                 $page = (string) rex_be_controller::getCurrentPage();
                 if ('' === $page) {
                     $page = rex_request::get('page', 'string', '');
                 }
-
-                if (!$replacement->appliesToBackendPage($page)) {
-                    continue;
-                }
+                $hasPageScope = null !== $replacement->getScopeBackendPages() && [] !== $replacement->getScopeBackendPages();
+                $pageMatches = $replacement->appliesToBackendPage($page);
 
                 $requestUri = rex_server('REQUEST_URI', 'string', '');
                 $queryParams = [];
@@ -107,7 +105,20 @@ class HtmlReplacementService
                 if (is_string($queryString) && '' !== $queryString) {
                     parse_str($queryString, $queryParams);
                 }
-                if (!$replacement->appliesToBackendRequest($requestUri, $queryParams)) {
+
+                $requestPattern = $replacement->getScopeBackendRequestPattern();
+                $hasRequestScope = null !== $requestPattern && '' !== trim($requestPattern);
+                $requestMatches = $replacement->appliesToBackendRequest($requestUri, $queryParams);
+
+                if ($hasPageScope && $hasRequestScope) {
+                    if (!$pageMatches && !$requestMatches) {
+                        continue;
+                    }
+                } elseif ($hasPageScope) {
+                    if (!$pageMatches) {
+                        continue;
+                    }
+                } elseif ($hasRequestScope && !$requestMatches) {
                     continue;
                 }
             }
@@ -121,11 +132,15 @@ class HtmlReplacementService
     /**
      * Führt eine einzelne Ersetzung aus
      */
-    private static function applyReplacement(string $content, HtmlReplacement $replacement): string
+    private static function applyReplacement(string $content, HtmlReplacement $replacement, bool $protectFormValues): string
     {
+        if ($protectFormValues && HtmlReplacement::TYPE_CSS_SELECTOR !== $replacement->getType()) {
+            return $content;
+        }
+
         switch ($replacement->getType()) {
             case HtmlReplacement::TYPE_CSS_SELECTOR:
-                return self::applyCssSelector($content, $replacement);
+                return self::applyCssSelector($content, $replacement, $protectFormValues);
             
             case HtmlReplacement::TYPE_HTML_MATCH:
                 return self::applyHtmlMatch($content, $replacement);
@@ -144,7 +159,7 @@ class HtmlReplacementService
     /**
      * Ersetzung via CSS-Selektor
      */
-    private static function applyCssSelector(string $content, HtmlReplacement $replacement): string
+    private static function applyCssSelector(string $content, HtmlReplacement $replacement, bool $protectFormValues): string
     {
         if ('' === trim($content)) {
             return $content;
@@ -172,6 +187,10 @@ class HtmlReplacementService
                 $node = $nodes->item($i);
                 
                 if (!$node instanceof Element) {
+                    continue;
+                }
+
+                if ($protectFormValues && self::isProtectedFormNode($node)) {
                     continue;
                 }
 
@@ -385,5 +404,28 @@ class HtmlReplacementService
         self::$allowSnippetsInHtmlReplacements = (bool) rex_addon::get('snippets')->getConfig('html_replacement_allow_snippets', false);
 
         return self::$allowSnippetsInHtmlReplacements;
+    }
+
+    private static function isProtectedFormNode(Element $node): bool
+    {
+        $tag = strtolower($node->tagName);
+
+        if (in_array($tag, ['form', 'input', 'textarea', 'select', 'option', 'button'], true)) {
+            return true;
+        }
+
+        if ($node->hasAttribute('name') || $node->hasAttribute('value')) {
+            return true;
+        }
+
+        $ancestor = $node->parentNode;
+        while ($ancestor instanceof Element) {
+            if ('form' === strtolower($ancestor->tagName)) {
+                return true;
+            }
+            $ancestor = $ancestor->parentNode;
+        }
+
+        return false;
     }
 }

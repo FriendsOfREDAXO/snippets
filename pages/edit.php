@@ -139,7 +139,10 @@ $categories = [];
 for ($i = 0; $i < $sql->getRows(); ++$i) {
     $catId = $sql->getValue('id');
     if (is_scalar($catId)) {
-        $categories[(int) $catId] = (string) $sql->getValue('name');
+        $categories[(int) $catId] = [
+            'name' => (string) $sql->getValue('name'),
+            'icon' => trim((string) $sql->getValue('icon')),
+        ];
     }
     $sql->next();
 }
