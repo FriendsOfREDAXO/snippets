@@ -33,7 +33,10 @@ if ('save' === $func) {
         $addon->setConfig('deepl_language_mapping', rex_request::post('deepl_language_mapping', 'string', ''));
         $addon->setConfig('tstr_sprog_syntax', rex_request::post('tstr_sprog_syntax', 'bool'));
         $addon->setConfig('tstr_source_clang_id', rex_request::post('tstr_source_clang_id', 'int', rex_clang::getStartId()));
+        $addon->setConfig('tstr_fallback_enabled', rex_request::post('tstr_fallback_enabled', 'bool'));
+        $addon->setConfig('tstr_fallback_clang_id', rex_request::post('tstr_fallback_clang_id', 'int', rex_clang::getStartId()));
 
+        SnippetsTranslate::clearCache();
         echo rex_view::success(rex_i18n::msg('settings_saved'));
     }
 }
@@ -106,6 +109,8 @@ $abbreviationExcludeSelectors = (string) $addon->getConfig('abbreviation_exclude
 $deeplLanguageMapping = (string) $addon->getConfig('deepl_language_mapping', '');
 $tstrSprogSyntax = (bool) $addon->getConfig('tstr_sprog_syntax', false);
 $tstrSourceClangId = (int) $addon->getConfig('tstr_source_clang_id', rex_clang::getStartId());
+$tstrFallbackEnabled = (bool) $addon->getConfig('tstr_fallback_enabled', false);
+$tstrFallbackClangId = (int) $addon->getConfig('tstr_fallback_clang_id', rex_clang::getStartId());
 
 $content = '
 <form method="post" action="' . rex_url::currentBackendPage() . '">
@@ -195,6 +200,32 @@ $content .= '
     </fieldset>
 
     <fieldset>
+        <legend>' . $addon->i18n('snippets_tstr_settings_fallback_title') . '</legend>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="tstr_fallback_enabled" value="1" ' . ($tstrFallbackEnabled ? 'checked' : '') . '>
+                ' . $addon->i18n('snippets_tstr_settings_fallback_enabled') . '
+            </label>
+            <p class="help-block">' . $addon->i18n('snippets_tstr_settings_fallback_enabled_help') . '</p>
+        </div>
+
+        <div class="form-group">
+            <label for="tstr_fallback_clang_id">' . $addon->i18n('snippets_tstr_settings_fallback_label') . '</label>
+            <select class="form-control" id="tstr_fallback_clang_id" name="tstr_fallback_clang_id">';
+
+foreach (rex_clang::getAll() as $fbClang) {
+    $selected = $fbClang->getId() === $tstrFallbackClangId ? ' selected' : '';
+    $content .= '<option value="' . $fbClang->getId() . '"' . $selected . '>' . rex_escape($fbClang->getName()) . ' (' . rex_escape($fbClang->getCode()) . ')</option>';
+}
+
+$content .= '
+            </select>
+            <p class="help-block">' . $addon->i18n('snippets_tstr_settings_fallback_help') . '</p>
+        </div>
+    </fieldset>
+
+    <fieldset>
         <legend>' . $addon->i18n('snippets_tstr_settings_title') . '</legend>';
 
 // Aktuelle Sprachen und deren automatisches Mapping anzeigen
@@ -270,6 +301,86 @@ $fragment = new rex_fragment();
 $fragment->setVar('title', 'Statistiken', false);
 $fragment->setVar('body', $statsContent, false);
 echo $fragment->parse('core/page/section.php');
+
+// Fehlende Platzhalter Analyse
+if ('analyze_placeholders' === $func) {
+    if (!$csrfToken->isValid()) {
+        echo rex_view::error(rex_i18n::msg('csrf_token_invalid'));
+    } else {
+        $analysis = SnippetsTranslate::findMissingPlaceholders();
+
+        $analyzeContent = '<div class="row">';
+        $analyzeContent .= '<div class="col-sm-4">';
+        $analyzeContent .= '<div class="panel panel-default"><div class="panel-body text-center">';
+        $analyzeContent .= '<h2 class="text-primary" style="margin:0">' . $analysis['defined_count'] . '</h2>';
+        $analyzeContent .= '<small>' . $addon->i18n('snippets_tstr_analyze_defined') . '</small>';
+        $analyzeContent .= '</div></div></div>';
+
+        $analyzeContent .= '<div class="col-sm-4">';
+        $analyzeContent .= '<div class="panel panel-default"><div class="panel-body text-center">';
+        $analyzeContent .= '<h2 class="text-info" style="margin:0">' . $analysis['used_count'] . '</h2>';
+        $analyzeContent .= '<small>' . $addon->i18n('snippets_tstr_analyze_used_in_slices') . '</small>';
+        $analyzeContent .= '</div></div></div>';
+
+        $analyzeContent .= '<div class="col-sm-4">';
+        $analyzeContent .= '<div class="panel panel-default"><div class="panel-body text-center">';
+        $analyzeContent .= '<h2 style="margin:0;color:' . ($analysis['missing_count'] > 0 ? '#d9534f' : '#5cb85c') . '">' . $analysis['missing_count'] . '</h2>';
+        $analyzeContent .= '<small>' . $addon->i18n('snippets_tstr_analyze_missing') . '</small>';
+        $analyzeContent .= '</div></div></div>';
+        $analyzeContent .= '</div>';
+
+        if ($analysis['missing_count'] > 0) {
+            $analyzeContent .= '<table class="table table-striped table-hover">';
+            $analyzeContent .= '<thead><tr>';
+            $analyzeContent .= '<th>' . $addon->i18n('snippets_tstr_key') . '</th>';
+            $analyzeContent .= '<th>' . $addon->i18n('snippets_tstr_analyze_occurrences') . '</th>';
+            $analyzeContent .= '<th>' . $addon->i18n('snippets_tstr_analyze_articles') . '</th>';
+            $analyzeContent .= '<th></th>';
+            $analyzeContent .= '</tr></thead><tbody>';
+
+            foreach ($analysis['missing'] as $key => $info) {
+                $articleLinks = [];
+                foreach ($info['articles'] as $articleId) {
+                    $article = rex_article::get($articleId);
+                    $articleName = null !== $article ? rex_escape($article->getName()) : 'ID ' . $articleId;
+                    $articleLinks[] = '<a href="' . rex_url::backendPage('content/edit', ['article_id' => $articleId, 'mode' => 'edit']) . '">' . $articleName . '</a>';
+                }
+
+                $analyzeContent .= '<tr>';
+                $analyzeContent .= '<td><code>' . rex_escape($key) . '</code></td>';
+                $analyzeContent .= '<td><span class="badge">' . $info['count'] . '</span></td>';
+                $analyzeContent .= '<td>' . implode(', ', $articleLinks) . '</td>';
+                $analyzeContent .= '<td><a href="' . rex_url::backendPage('snippets/translations', ['func' => 'add', 'key' => $key]) . '" class="btn btn-xs btn-success" title="' . $addon->i18n('snippets_tstr_analyze_create') . '"><i class="rex-icon fa-plus"></i></a></td>';
+                $analyzeContent .= '</tr>';
+            }
+
+            $analyzeContent .= '</tbody></table>';
+        } else {
+            $analyzeContent .= '<p class="text-success"><i class="rex-icon fa-check"></i> ' . $addon->i18n('snippets_tstr_analyze_all_defined') . '</p>';
+        }
+
+        $analyzeFragment = new rex_fragment();
+        $analyzeFragment->setVar('title', $addon->i18n('snippets_tstr_analyze_result_title'), false);
+        $analyzeFragment->setVar('body', $analyzeContent, false);
+        echo $analyzeFragment->parse('core/page/section.php');
+    }
+}
+
+// Analyse starten Button
+$analyzeButtonContent = '
+<p>' . $addon->i18n('snippets_tstr_analyze_description') . '</p>
+<form method="post" action="' . rex_url::currentBackendPage() . '">
+    <input type="hidden" name="func" value="analyze_placeholders">
+    ' . $csrfToken->getHiddenField() . '
+    <button type="submit" class="btn btn-primary">
+        <i class="rex-icon fa-search"></i> ' . $addon->i18n('snippets_tstr_analyze_button') . '
+    </button>
+</form>';
+
+$analyzeButtonFragment = new rex_fragment();
+$analyzeButtonFragment->setVar('title', $addon->i18n('snippets_tstr_analyze_title'), false);
+$analyzeButtonFragment->setVar('body', $analyzeButtonContent, false);
+echo $analyzeButtonFragment->parse('core/page/section.php');
 
 // Sprog-Import (nur wenn Sprog verfügbar)
 if (rex_addon::get('sprog')->isAvailable()) {

@@ -15,16 +15,12 @@ page:
         translations:
             title: 'translate:snippets_tstr_nav'
             icon: rex-icon fa-language
-            perm: snippets[]
+            perm: snippets[translate]
         edit:
             title: 'translate:snippets_edit'
             icon: rex-icon fa-pencil
             perm: snippets[admin|editor]
             hidden: true
-        categories:
-            title: 'translate:snippets_categories'
-            icon: rex-icon fa-folder-open
-            perm: snippets[admin]
         html_replacement:
             title: 'translate:snippets_html_replacements'
             icon: rex-icon fa-exchange
@@ -35,14 +31,20 @@ page:
                 edit:
                     title: 'translate:snippets_html_replacement_edit_title'
                     hidden: true
+        categories:
+            title: 'translate:snippets_categories'
+            icon: rex-icon fa-folder-open
+            perm: snippets[admin]
         settings:
             title: 'translate:snippets_settings'
             icon: rex-icon fa-cogs
             perm: snippets[admin]
+            itemClass: pull-right
         import_export:
             title: 'translate:snippets_import_export'
             icon: rex-icon fa-download
             perm: snippets[admin]
+            itemClass: pull-right
         help:
             title: 'translate:snippets_help'
             icon: rex-icon fa-question-circle

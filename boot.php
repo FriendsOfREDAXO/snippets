@@ -18,6 +18,7 @@ rex_api_function::register('snippets_translations', FriendsOfREDAXO\Snippets\Api
 if (rex::isBackend() && null !== rex::getUser()) {
     rex_perm::register('snippets[admin]', rex_i18n::msg('perm_general_snippets[admin]'));
     rex_perm::register('snippets[editor]', rex_i18n::msg('perm_general_snippets[editor]'));
+    rex_perm::register('snippets[translate]', rex_i18n::msg('perm_general_snippets[translate]'));
     rex_perm::register('snippets[viewer]', rex_i18n::msg('perm_general_snippets[viewer]'));
 }
 
@@ -45,6 +46,16 @@ if (!rex::isBackend()) {
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
         return HtmlReplacementService::process($ep->getSubject(), 'frontend');
     }, rex_extension::LATE);
+}
+
+// Backend: String-Übersetzungen in Slice-Vorschau (SLICE_SHOW)
+// Ersetzt [[ key ]]-Platzhalter nur im gerenderten Slice-Output,
+// nicht in Formularen, Textareas oder Backend-UI-Elementen.
+// Besser als OUTPUT_FILTER: kein Risiko für Editoren.
+if (rex::isBackend()) {
+    rex_extension::register('SLICE_SHOW', static function (rex_extension_point $ep) {
+        return SnippetsTranslate::replace($ep->getSubject(), (int) $ep->getParam('clang'));
+    }, rex_extension::EARLY);
 }
 
 // Backend: Snippet-Replacement (nur in sicheren Kontexten)

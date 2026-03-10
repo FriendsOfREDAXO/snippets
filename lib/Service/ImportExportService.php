@@ -258,6 +258,361 @@ class ImportExportService
     }
 
     /**
+     * Exportiert Übersetzungen als XLIFF 1.2 (Industriestandard für CAT-Tools)
+     *
+     * XLIFF arbeitet mit Quell-/Ziel-Sprachpaaren. Pro Zielsprache wird ein
+     * XLIFF-Dokument erzeugt. Unterstützt von SDL Trados, memoQ, Memsource, Phrase u.a.
+     *
+     * @param int $targetClangId Ziel-Sprach-ID
+     * @param int|null $sourceClangId Quell-Sprach-ID (null = konfigurierte Quellsprache)
+     * @param array<int>|null $ids Nur bestimmte String-IDs exportieren, null = alle
+     * @return array{success: bool, data?: string, source_lang?: string, target_lang?: string, error?: string}
+     */
+    public static function exportTranslationsXliff(int $targetClangId, ?int $sourceClangId = null, ?array $ids = null): array
+    {
+        try {
+            $sourceClangId ??= (int) \rex_addon::get('snippets')->getConfig('tstr_source_clang_id', \rex_clang::getStartId());
+
+            if ($sourceClangId === $targetClangId) {
+                return ['success' => false, 'error' => 'Source and target language must be different'];
+            }
+
+            $sourceClang = \rex_clang::get($sourceClangId);
+            $targetClang = \rex_clang::get($targetClangId);
+
+            if (null === $sourceClang || null === $targetClang) {
+                return ['success' => false, 'error' => 'Invalid language ID'];
+            }
+
+            $srcCode = $sourceClang->getCode();
+            $tgtCode = $targetClang->getCode();
+
+            $strings = TranslationStringRepository::findAll();
+
+            if (null !== $ids) {
+                $strings = array_filter($strings, static fn ($s) => in_array($s->getId(), $ids, true));
+            }
+
+            // XLIFF 1.2 XML aufbauen
+            $dom = new \DOMDocument('1.0', 'UTF-8');
+            $dom->formatOutput = true;
+
+            $xliff = $dom->createElementNS('urn:oasis:names:tc:xliff:document:1.2', 'xliff');
+            $xliff->setAttribute('version', '1.2');
+            $dom->appendChild($xliff);
+
+            $file = $dom->createElement('file');
+            $file->setAttribute('original', 'snippets-translations');
+            $file->setAttribute('source-language', $srcCode);
+            $file->setAttribute('target-language', $tgtCode);
+            $file->setAttribute('datatype', 'plaintext');
+            $file->setAttribute('tool-id', 'redaxo-snippets');
+            $file->setAttribute('date', date('Y-m-d\TH:i:s\Z'));
+            $xliff->appendChild($file);
+
+            // Header mit Tool-Info
+            $header = $dom->createElement('header');
+            $tool = $dom->createElement('tool');
+            $tool->setAttribute('tool-id', 'redaxo-snippets');
+            $tool->setAttribute('tool-name', 'REDAXO Snippets AddOn');
+            $tool->setAttribute('tool-version', \rex_addon::get('snippets')->getVersion());
+            $header->appendChild($tool);
+            $file->appendChild($header);
+
+            $body = $dom->createElement('body');
+            $file->appendChild($body);
+
+            $unitCount = 0;
+            foreach ($strings as $string) {
+                if (!$string->isActive()) {
+                    continue;
+                }
+
+                $values = $string->getValues();
+                $sourceValue = $values[$sourceClangId] ?? '';
+
+                // Nur Einträge mit Quelltext exportieren
+                if ('' === $sourceValue) {
+                    continue;
+                }
+
+                $targetValue = $values[$targetClangId] ?? '';
+
+                $transUnit = $dom->createElement('trans-unit');
+                $transUnit->setAttribute('id', $string->getKey());
+                $transUnit->setAttribute('resname', $string->getKey());
+
+                $source = $dom->createElement('source');
+                $source->appendChild($dom->createTextNode($sourceValue));
+                $transUnit->appendChild($source);
+
+                $target = $dom->createElement('target');
+                if ('' !== $targetValue) {
+                    $target->setAttribute('state', 'translated');
+                    $target->appendChild($dom->createTextNode($targetValue));
+                } else {
+                    $target->setAttribute('state', 'new');
+                }
+                $transUnit->appendChild($target);
+
+                // Kategorie als Note
+                $catId = $string->getCategoryId();
+                if (null !== $catId && $catId > 0) {
+                    $categories = self::loadCategories();
+                    if (isset($categories[$catId])) {
+                        $note = $dom->createElement('note');
+                        $note->setAttribute('from', 'category');
+                        $note->appendChild($dom->createTextNode($categories[$catId]['name']));
+                        $transUnit->appendChild($note);
+                    }
+                }
+
+                $body->appendChild($transUnit);
+                ++$unitCount;
+            }
+
+            if (0 === $unitCount) {
+                return ['success' => false, 'error' => 'No translatable entries found for the selected language pair'];
+            }
+
+            $xml = $dom->saveXML();
+
+            if (false === $xml) {
+                return ['success' => false, 'error' => 'XML generation failed'];
+            }
+
+            return [
+                'success' => true,
+                'data' => $xml,
+                'source_lang' => $srcCode,
+                'target_lang' => $tgtCode,
+                'count' => $unitCount,
+            ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Analysiert eine XLIFF-Datei und gibt Vorschau zurück (ohne zu importieren)
+     *
+     * @param string $xml XLIFF-XML-String
+     * @return array{valid: bool, source_lang?: string, target_lang?: string, target_clang_id?: int|null, target_clang_name?: string|null, count?: int, existing_keys?: int, new_keys?: int, translated?: int, untranslated?: int, error?: string}
+     */
+    public static function analyzeXliffImport(string $xml): array
+    {
+        $dom = new \DOMDocument();
+        $prev = libxml_use_internal_errors(true);
+        $loaded = $dom->loadXML($xml);
+        libxml_use_internal_errors($prev);
+
+        if (!$loaded) {
+            return ['valid' => false, 'error' => 'Invalid XML'];
+        }
+
+        $fileNodes = $dom->getElementsByTagName('file');
+        if (0 === $fileNodes->length) {
+            return ['valid' => false, 'error' => 'No <file> element found in XLIFF'];
+        }
+
+        $fileNode = $fileNodes->item(0);
+        if (!$fileNode instanceof \DOMElement) {
+            return ['valid' => false, 'error' => 'Invalid <file> element'];
+        }
+
+        $sourceLangCode = $fileNode->getAttribute('source-language');
+        $targetLangCode = $fileNode->getAttribute('target-language');
+
+        if ('' === $targetLangCode) {
+            return ['valid' => false, 'error' => 'No target-language attribute in XLIFF'];
+        }
+
+        // Ziel-Sprache in REDAXO suchen
+        $targetClangId = null;
+        $targetClangName = null;
+        foreach (\rex_clang::getAll() as $clang) {
+            if ($clang->getCode() === $targetLangCode) {
+                $targetClangId = $clang->getId();
+                $targetClangName = $clang->getName();
+                break;
+            }
+        }
+
+        // Trans-Units zählen und analysieren
+        $transUnits = $dom->getElementsByTagName('trans-unit');
+        $count = 0;
+        $existingKeys = 0;
+        $newKeys = 0;
+        $translated = 0;
+        $untranslated = 0;
+
+        foreach ($transUnits as $unit) {
+            if (!$unit instanceof \DOMElement) {
+                continue;
+            }
+
+            $key = $unit->getAttribute('resname');
+            if ('' === $key) {
+                $key = $unit->getAttribute('id');
+            }
+            if ('' === $key) {
+                continue;
+            }
+
+            ++$count;
+
+            // Key existiert?
+            if (TranslationStringRepository::keyExists($key)) {
+                ++$existingKeys;
+            } else {
+                ++$newKeys;
+            }
+
+            // Target vorhanden?
+            $targetNodes = $unit->getElementsByTagName('target');
+            if ($targetNodes->length > 0) {
+                $targetValue = $targetNodes->item(0)->textContent ?? '';
+                if ('' !== $targetValue) {
+                    ++$translated;
+                } else {
+                    ++$untranslated;
+                }
+            } else {
+                ++$untranslated;
+            }
+        }
+
+        return [
+            'valid' => true,
+            'source_lang' => $sourceLangCode,
+            'target_lang' => $targetLangCode,
+            'target_clang_id' => $targetClangId,
+            'target_clang_name' => $targetClangName,
+            'count' => $count,
+            'existing_keys' => $existingKeys,
+            'new_keys' => $newKeys,
+            'translated' => $translated,
+            'untranslated' => $untranslated,
+        ];
+    }
+
+    /**
+     * Importiert Übersetzungen aus XLIFF 1.2
+     *
+     * Liest trans-unit Elemente und aktualisiert die Zielsprach-Werte.
+     * Neue Keys können optional angelegt werden.
+     *
+     * @param string $xml XLIFF-XML-String
+     * @param bool $createMissing Fehlende Keys automatisch anlegen
+     * @return array{success: bool, imported?: int, skipped?: int, created?: int, source_lang?: string, target_lang?: string, error?: string}
+     */
+    public static function importTranslationsXliff(string $xml, bool $createMissing = false): array
+    {
+        try {
+            $dom = new \DOMDocument();
+            if (!$dom->loadXML($xml)) {
+                return ['success' => false, 'error' => 'Invalid XML'];
+            }
+
+            $fileNodes = $dom->getElementsByTagName('file');
+            if (0 === $fileNodes->length) {
+                return ['success' => false, 'error' => 'No <file> element found in XLIFF'];
+            }
+
+            $fileNode = $fileNodes->item(0);
+            if (!$fileNode instanceof \DOMElement) {
+                return ['success' => false, 'error' => 'Invalid <file> element'];
+            }
+
+            $targetLangCode = $fileNode->getAttribute('target-language');
+            $sourceLangCode = $fileNode->getAttribute('source-language');
+
+            if ('' === $targetLangCode) {
+                return ['success' => false, 'error' => 'No target-language attribute in XLIFF'];
+            }
+
+            // Ziel-Sprach-ID ermitteln
+            $targetClangId = null;
+            foreach (\rex_clang::getAll() as $clang) {
+                if ($clang->getCode() === $targetLangCode) {
+                    $targetClangId = $clang->getId();
+                    break;
+                }
+            }
+
+            if (null === $targetClangId) {
+                return ['success' => false, 'error' => 'Target language "' . $targetLangCode . '" not found in REDAXO'];
+            }
+
+            $transUnits = $dom->getElementsByTagName('trans-unit');
+            $imported = 0;
+            $skipped = 0;
+            $created = 0;
+
+            foreach ($transUnits as $unit) {
+                if (!$unit instanceof \DOMElement) {
+                    continue;
+                }
+
+                $key = $unit->getAttribute('resname');
+                if ('' === $key) {
+                    $key = $unit->getAttribute('id');
+                }
+                if ('' === $key) {
+                    ++$skipped;
+                    continue;
+                }
+
+                // Target-Wert auslesen
+                $targetNodes = $unit->getElementsByTagName('target');
+                if (0 === $targetNodes->length) {
+                    ++$skipped;
+                    continue;
+                }
+
+                $targetValue = $targetNodes->item(0)->textContent ?? '';
+                if ('' === $targetValue) {
+                    ++$skipped;
+                    continue;
+                }
+
+                // Key in DB suchen
+                $existing = TranslationStringRepository::getByKey($key);
+
+                if (null === $existing) {
+                    if ($createMissing) {
+                        $newId = TranslationStringRepository::save([
+                            'key_name' => $key,
+                            'status' => 1,
+                        ]);
+                        TranslationStringRepository::saveValue($newId, $targetClangId, $targetValue);
+                        ++$created;
+                    } else {
+                        ++$skipped;
+                        continue;
+                    }
+                } else {
+                    TranslationStringRepository::saveValue($existing->getId(), $targetClangId, $targetValue);
+                    ++$imported;
+                }
+            }
+
+            SnippetsTranslate::clearCache();
+
+            return [
+                'success' => true,
+                'imported' => $imported,
+                'skipped' => $skipped,
+                'created' => $created,
+                'source_lang' => $sourceLangCode,
+                'target_lang' => $targetLangCode,
+            ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Analysiert eine Import-Datei und gibt Vorschau/Konfliktinfo zurück
      *
      * Wird VOR dem tatsächlichen Import aufgerufen, um dem Benutzer

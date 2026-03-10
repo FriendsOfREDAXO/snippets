@@ -13,7 +13,7 @@ use FriendsOfREDAXO\Snippets\Service\PermissionService;
 use FriendsOfREDAXO\Snippets\Service\SnippetsTranslate;
 
 // Berechtigungsprüfung
-if (!PermissionService::canView()) {
+if (!PermissionService::canTranslate()) {
     echo rex_view::error(rex_i18n::msg('no_rights'));
     return;
 }

@@ -39,6 +39,10 @@
   - Automatische Erkennung passender lokaler Sprachen per Code
 - **Paginierung:** Bei vielen Keys wird die Übersetzungsliste paginiert (50 pro Seite)
 - **Seiten-Icons:** Alle AddOn-Unterseiten haben jetzt passende FontAwesome-Icons
+- **Sprach-Vererbung (Clang-Base):** Basis-Sprache konfigurierbar, fehlende Übersetzungen werden automatisch aus der Fallback-Sprache übernommen – Texte die in allen Sprachen gleich sind müssen nur einmal gepflegt werden
+- **Fehlende Platzhalter erkennen:** Analyse-Tool in den Einstellungen scannt alle Artikelinhalte nach `[[ key ]]`-Platzhaltern und zeigt nicht definierte Schlüssel mit Artikelverweisen an – fehlende Übersetzungen können direkt angelegt werden
+- **XLIFF 1.2 Export/Import:** Übersetzungen im Industriestandard-Format für professionelle Übersetzer-Tools (SDL Trados, memoQ, Memsource, Phrase) exportieren und importieren – Quell-/Zielsprache pro Datei, `state`-Attribute, automatische Spracherkennung beim Import
+- **Backend Slice-Vorschau:** Platzhalter `[[ key ]]` werden jetzt auch in der Backend-Artikelbearbeitung aufgelöst – per `SLICE_SHOW` Extension Point, gezielt nur im gerenderten Slice-Output. Formulare, Textareas und UI-Elemente bleiben unberührt (besser als Sprogs blinder OUTPUT_FILTER)
 
 ### Verbessert
 

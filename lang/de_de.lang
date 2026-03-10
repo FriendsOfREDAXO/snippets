@@ -120,6 +120,7 @@ snippets_copied_to_clipboard = Shortcode wurde in die Zwischenablage kopiert
 perm_general_snippets[] = Snippets: Zugriff auf AddOn
 perm_general_snippets[admin] = Snippets: Vollzugriff & PHP-Snippets
 perm_general_snippets[editor] = Snippets: Bearbeiten (HTML/Text)
+perm_general_snippets[translate] = Snippets: Übersetzungen verwalten
 perm_general_snippets[viewer] = Snippets: Nur ansehen
 
 # Kategorien
@@ -392,3 +393,50 @@ snippets_tstr_settings_source_help = Diese Sprache wird als Quelle für DeepL-Ba
 snippets_tstr_key_updated = Schlüssel aktualisiert
 snippets_tstr_click_to_edit_key = Doppelklick zum Bearbeiten des Schlüssels
 snippets_tstr_cancel = Abbrechen
+
+# Sprach-Vererbung (Clang-Base)
+snippets_tstr_settings_fallback_title = Sprach-Vererbung (Clang-Base)
+snippets_tstr_settings_fallback_enabled = Sprach-Vererbung aktivieren
+snippets_tstr_settings_fallback_enabled_help = Wenn aktiviert, werden fehlende Übersetzungen automatisch aus der Basis-Sprache übernommen. So müssen Texte, die in allen Sprachen gleich sind, nur einmal gepflegt werden.
+snippets_tstr_settings_fallback_label = Basis-Sprache (Fallback)
+snippets_tstr_settings_fallback_help = Sprache, deren Werte als Fallback für leere Übersetzungen verwendet werden. In der Regel die Hauptsprache des Projekts.
+
+# Fehlende Platzhalter Analyse
+snippets_tstr_analyze_title = Fehlende Platzhalter erkennen
+snippets_tstr_analyze_description = Scannt alle Artikelinhalte nach [[ key ]]-Platzhaltern und vergleicht sie mit den definierten Übersetzungs-Schlüsseln. So finden Sie Platzhalter, die verwendet aber nicht als Übersetzung angelegt wurden.
+snippets_tstr_analyze_button = Platzhalter analysieren
+snippets_tstr_analyze_result_title = Analyse-Ergebnis
+snippets_tstr_analyze_defined = Definierte Schlüssel
+snippets_tstr_analyze_used_in_slices = In Artikeln verwendet
+snippets_tstr_analyze_missing = Fehlende Schlüssel
+snippets_tstr_analyze_occurrences = Vorkommen
+snippets_tstr_analyze_articles = Artikel
+snippets_tstr_analyze_create = Übersetzung anlegen
+snippets_tstr_analyze_all_defined = Alle verwendeten Platzhalter sind als Übersetzung definiert.
+
+# XLIFF Export/Import
+snippets_xliff_panel_title = XLIFF für Übersetzer
+snippets_xliff_export_description = Exportieren Sie Übersetzungen im XLIFF 1.2 Format – dem Industriestandard für professionelle Übersetzer-Tools (SDL Trados, memoQ, Memsource, Phrase u.a.).
+snippets_xliff_source = Quellsprache
+snippets_xliff_target = Zielsprache
+snippets_xliff_select_target = Zielsprache wählen
+snippets_xliff_export_button = XLIFF exportieren
+snippets_xliff_import_title = XLIFF importieren
+snippets_xliff_import_description = Importieren Sie eine vom Übersetzer bearbeitete XLIFF-Datei. Die Zielsprache wird automatisch aus der Datei erkannt.
+snippets_xliff_file = XLIFF-Datei (.xliff, .xlf)
+snippets_xliff_create_missing = Neue Schlüssel automatisch anlegen
+snippets_xliff_create_missing_help = Wenn aktiviert, werden Schlüssel aus der XLIFF-Datei automatisch als neue Übersetzung angelegt, falls sie noch nicht existieren.
+snippets_xliff_import_button = XLIFF importieren
+snippets_xliff_analyze_button = XLIFF analysieren
+snippets_xliff_import_success = XLIFF-Import abgeschlossen: {0} aktualisiert, {1} neu angelegt, {2} übersprungen. Zielsprache: {3}.
+snippets_xliff_error_no_target = Bitte wählen Sie eine Zielsprache aus.
+snippets_xliff_preview_title = XLIFF-Import Vorschau
+snippets_xliff_preview_source_lang = Quellsprache
+snippets_xliff_preview_target_lang = Zielsprache
+snippets_xliff_preview_matched = erkannt
+snippets_xliff_preview_no_match = nicht zugeordnet
+snippets_xliff_preview_count = Übersetzungseinheiten
+snippets_xliff_preview_existing = Bestehende Schlüssel
+snippets_xliff_preview_new = Neue Schlüssel
+snippets_xliff_preview_translated = Übersetzt
+snippets_xliff_preview_untranslated = Nicht übersetzt

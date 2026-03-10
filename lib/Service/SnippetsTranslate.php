@@ -37,6 +37,12 @@ class SnippetsTranslate
     /** @var bool|null Gecachter Sprog-Syntax-Config-Wert */
     private static ?bool $sprogSyntaxEnabled = null;
 
+    /** @var int|null Gecachte Basis-Sprach-ID für Vererbung (null = deaktiviert) */
+    private static ?int $fallbackClangId = null;
+
+    /** @var bool Flag ob Fallback-Config bereits geladen wurde */
+    private static bool $fallbackConfigLoaded = false;
+
     /** @var bool Ob einer der Werte im Cache selbst Platzhalter enthält */
     private static bool $hasNestedPlaceholders = false;
 
@@ -141,6 +147,8 @@ class SnippetsTranslate
         self::$replacementMap = null;
         self::$cachedClangId = null;
         self::$sprogSyntaxEnabled = null;
+        self::$fallbackClangId = null;
+        self::$fallbackConfigLoaded = false;
         self::$hasNestedPlaceholders = false;
     }
 
@@ -159,6 +167,18 @@ class SnippetsTranslate
         // Strings aus DB laden (eine Query)
         self::$cache = TranslationStringRepository::findAllActiveForClang($clangId);
         self::$cachedClangId = $clangId;
+
+        // Sprach-Vererbung: Fehlende Werte aus Basis-Sprache übernehmen
+        $fallbackId = self::getFallbackClangId();
+        if (null !== $fallbackId && $fallbackId !== $clangId) {
+            $fallbackStrings = TranslationStringRepository::findAllActiveForClang($fallbackId);
+            // Nur fehlende Keys ergänzen – vorhandene Werte haben Vorrang
+            foreach ($fallbackStrings as $key => $value) {
+                if (!isset(self::$cache[$key])) {
+                    self::$cache[$key] = $value;
+                }
+            }
+        }
 
         if ([] === self::$cache) {
             self::$replacementMap = [];
@@ -193,6 +213,30 @@ class SnippetsTranslate
 
         self::$replacementMap = $map;
         self::$hasNestedPlaceholders = $hasNested;
+    }
+
+    /**
+     * Gibt die konfigurierte Basis-Sprach-ID für Vererbung zurück.
+     *
+     * Wenn aktiviert, werden fehlende Übersetzungen aus dieser Sprache übernommen.
+     * Wird nur einmal pro Request geladen.
+     *
+     * @return int|null Basis-Sprach-ID oder null wenn deaktiviert
+     */
+    private static function getFallbackClangId(): ?int
+    {
+        if (!self::$fallbackConfigLoaded) {
+            $addon = \rex_addon::get('snippets');
+            $enabled = (bool) $addon->getConfig('tstr_fallback_enabled', false);
+            if ($enabled) {
+                self::$fallbackClangId = (int) $addon->getConfig('tstr_fallback_clang_id', \rex_clang::getStartId());
+            } else {
+                self::$fallbackClangId = null;
+            }
+            self::$fallbackConfigLoaded = true;
+        }
+
+        return self::$fallbackClangId;
     }
 
     /**
@@ -365,5 +409,103 @@ class SnippetsTranslate
 
         $apiKey = (string) \rex_addon::get('writeassist')->getConfig('api_key', '');
         return '' !== $apiKey;
+    }
+
+    /**
+     * Findet Platzhalter in Artikel-Slices, die nicht als Übersetzung definiert sind.
+     *
+     * Scannt rex_article_slice value1–value20 und medialist1–10, valuelist1–10
+     * nach [[ key ]] und optional {{ key }}-Platzhaltern.
+     *
+     * @return array{used: array<string, array{count: int, articles: array<int>}>, missing: array<string, array{count: int, articles: array<int>}>, defined_count: int, used_count: int, missing_count: int}
+     */
+    public static function findMissingPlaceholders(): array
+    {
+        $sprogSyntax = self::isSprogSyntaxEnabled();
+
+        // Regex für Platzhalter-Erkennung
+        $pattern = '/\[\[\s*([\w.\-]+)\s*\]\]/';
+        if ($sprogSyntax) {
+            $pattern = '/(?:\[\[\s*([\w.\-]+)\s*\]\]|\{\{\s*([\w.\-]+)\s*\}\})/';
+        }
+
+        // Alle value-Spalten scannen
+        $columns = [];
+        for ($i = 1; $i <= 20; ++$i) {
+            $columns[] = 'value' . $i;
+        }
+
+        $sql = \rex_sql::factory();
+        $select = implode(', ', $columns) . ', article_id';
+        $sql->setQuery('SELECT ' . $select . ' FROM ' . \rex::getTable('article_slice'));
+
+        $usedKeys = []; // key => [count, articles]
+
+        for ($i = 0; $i < $sql->getRows(); ++$i) {
+            $articleId = (int) $sql->getValue('article_id');
+
+            foreach ($columns as $col) {
+                $content = (string) $sql->getValue($col);
+                if ('' === $content) {
+                    continue;
+                }
+
+                if (!str_contains($content, '[[') && (!$sprogSyntax || !str_contains($content, '{{'))) {
+                    continue;
+                }
+
+                if (preg_match_all($pattern, $content, $matches)) {
+                    // Standard-Syntax: Gruppe 1, Sprog: Gruppe 1 oder 2
+                    $keys = $sprogSyntax
+                        ? array_filter(array_merge($matches[1], $matches[2]), static fn (string $v): bool => '' !== $v)
+                        : $matches[1];
+
+                    foreach ($keys as $key) {
+                        // snippet: und sprog: Prefix ausschließen
+                        if (str_starts_with($key, 'snippet:') || str_starts_with($key, 'sprog:')) {
+                            continue;
+                        }
+
+                        if (!isset($usedKeys[$key])) {
+                            $usedKeys[$key] = ['count' => 0, 'articles' => []];
+                        }
+                        ++$usedKeys[$key]['count'];
+                        if (!in_array($articleId, $usedKeys[$key]['articles'], true)) {
+                            $usedKeys[$key]['articles'][] = $articleId;
+                        }
+                    }
+                }
+            }
+            $sql->next();
+        }
+
+        // Gegen definierte Keys prüfen
+        $definedKeys = [];
+        $stringSql = \rex_sql::factory();
+        $stringSql->setQuery('SELECT key_name FROM ' . \rex::getTable('snippets_string') . ' WHERE status = 1');
+        for ($i = 0; $i < $stringSql->getRows(); ++$i) {
+            $definedKeys[(string) $stringSql->getValue('key_name')] = true;
+            $stringSql->next();
+        }
+
+        // Fehlende Keys ermitteln
+        $missing = [];
+        foreach ($usedKeys as $key => $info) {
+            if (!isset($definedKeys[$key])) {
+                $missing[$key] = $info;
+            }
+        }
+
+        // Nach Häufigkeit sortieren (meistgenutzt zuerst)
+        uasort($missing, static fn (array $a, array $b): int => $b['count'] <=> $a['count']);
+        uasort($usedKeys, static fn (array $a, array $b): int => $b['count'] <=> $a['count']);
+
+        return [
+            'used' => $usedKeys,
+            'missing' => $missing,
+            'defined_count' => count($definedKeys),
+            'used_count' => count($usedKeys),
+            'missing_count' => count($missing),
+        ];
     }
 }

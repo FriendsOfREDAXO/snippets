@@ -230,6 +230,66 @@ echo SnippetsTranslate::get('footer.full');
 
 > **Hinweis:** Zirkuläre Referenzen (A → B → A) werden nach 5 Durchläufen abgebrochen – der nicht auflösbare Platzhalter bleibt dann stehen.
 
+### Sprach-Vererbung (Clang-Base)
+
+Wenn eine Übersetzung für eine Sprache nicht vorhanden ist, kann automatisch der Wert einer **Basis-Sprache** übernommen werden. Damit müssen Texte, die in allen Sprachen gleich sind (z.B. Markennamen, technische Begriffe), nur einmal gepflegt werden.
+
+**Aktivierung:** Einstellungen → „Sprach-Vererbung aktivieren" → Basis-Sprache wählen (Standard: erste Sprache)
+
+**Beispiel:**
+
+| Key | Deutsch (Basis) | Englisch | Französisch |
+|-----|----------------|----------|-------------|
+| `company.name` | `ACME GmbH` | *(leer)* | *(leer)* |
+| `nav.home` | `Startseite` | `Home` | `Accueil` |
+
+**Ergebnis:** `[[ company.name ]]` liefert in allen Sprachen `ACME GmbH`, während `[[ nav.home ]]` sprachspezifisch ersetzt wird.
+
+> **Performance:** Die Fallback-Werte werden beim ersten Zugriff einmalig geladen und gecacht – keine zusätzlichen DB-Queries pro Platzhalter.
+
+### Fehlende Platzhalter erkennen
+
+In den **Einstellungen** findet sich die Analyse-Funktion „Fehlende Platzhalter erkennen". Sie scannt alle Artikelinhalte (`rex_article_slice` value1–20) nach `[[ key ]]`-Platzhaltern und vergleicht sie mit den definierten Übersetzungs-Schlüsseln.
+
+**Das Ergebnis zeigt:**
+- Anzahl definierter Schlüssel
+- Anzahl in Artikeln verwendeter Platzhalter
+- **Fehlende Schlüssel** mit Vorkommen und Links zu den betroffenen Artikeln
+- Direkte „+"-Buttons zum Anlegen der fehlenden Übersetzung
+
+Ideal für:
+- Qualitätssicherung nach dem Einpflegen neuer Module
+- Migration von anderen Systemen
+- Überprüfung ob alle Platzhalter korrekt angelegt sind
+
+### XLIFF Export/Import
+
+Für professionelle Übersetzer kann das Standard-Format **XLIFF 1.2** verwendet werden – kompatibel mit allen gängigen CAT-Tools (SDL Trados, memoQ, Memsource, Phrase, Crowdin u.a.).
+
+**Export:** Import/Export → XLIFF → Quell- und Zielsprache wählen → `.xliff`-Datei herunterladen
+
+Die XLIFF-Datei enthält:
+- Quell- und Zieltexte als `<trans-unit>` Elemente
+- `state="translated"` oder `state="new"` für den Übersetzungsstatus
+- Kategorien als `<note>` Elemente
+- Tool-Informationen im Header
+
+**Import:** Vom Übersetzer bearbeitete XLIFF-Datei hochladen → Zielsprache wird automatisch erkannt → Werte werden aktualisiert
+
+```php
+// Programmatischer XLIFF-Export
+$result = ImportExportService::exportTranslationsXliff(
+    targetClangId: 2,     // Englisch
+    sourceClangId: 1      // Deutsch
+);
+
+// Programmatischer XLIFF-Import
+$result = ImportExportService::importTranslationsXliff(
+    $xmlString,
+    createMissing: true   // Neue Keys anlegen
+);
+```
+
 ### DeepL-Integration
 
 Wenn das **WriteAssist**-AddOn installiert und ein DeepL-API-Key konfiguriert ist, stehen KI-Übersetzungen zur Verfügung:
@@ -238,6 +298,17 @@ Wenn das **WriteAssist**-AddOn installiert und ein DeepL-API-Key konfiguriert is
 - **Batch-Übersetzung:** Zielsprache wählen → alle leeren (oder alle) Strings werden serverseitig per DeepL übersetzt
 
 Ein separater API-Key ist **nicht** nötig – der DeepL-Token aus WriteAssist wird automatisch verwendet.
+
+### Backend Slice-Vorschau
+
+Platzhalter `[[ key ]]` werden auch im **Backend** aufgelöst – allerdings nicht blind per OUTPUT_FILTER (wie Sprog), sondern gezielt per `SLICE_SHOW` Extension Point. Das bedeutet:
+
+- **Slice-Vorschau:** Redakteure sehen „Startseite" statt `[[ nav.home ]]` in der Artikelbearbeitung
+- **Formulare geschützt:** Textareas, Input-Felder und Code-Editoren werden **nicht** ersetzt – Platzhalter bleiben dort erhalten
+- **Backend-UI unberührt:** Menüs, Labels und Navigation werden nicht beeinflusst
+- **Sprachrichtig:** Es wird die im Backend gewählte Content-Sprache verwendet (= die Sprache des Artikels)
+
+> **Hinweis:** Im Gegensatz zu Sprog, das den kompletten Backend-Output ersetzt und dabei riskiert, Formularinhalte zu verändern, arbeitet die Snippets-Lösung chirurgisch nur auf dem gerenderten Slice-Output.
 
 ### Sprog-Kompatibilität
 

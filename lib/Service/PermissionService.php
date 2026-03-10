@@ -44,6 +44,19 @@ class PermissionService
     }
 
     /**
+     * Prüft, ob der aktuelle User Übersetzungen bearbeiten darf
+     */
+    public static function canTranslate(): bool
+    {
+        $user = \rex::getUser();
+        return null !== $user && (
+            $user->isAdmin()
+            || $user->hasPerm('snippets[admin]')
+            || $user->hasPerm('snippets[translate]')
+        );
+    }
+
+    /**
      * Prüft, ob der aktuelle User Snippets ansehen darf
      */
     public static function canView(): bool

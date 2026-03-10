@@ -119,6 +119,7 @@ snippets_copied_to_clipboard = Shortcode copied to clipboard
 perm_general_snippets[] = Snippets: Access to addon
 perm_general_snippets[admin] = Snippets: Full access & PHP snippets
 perm_general_snippets[editor] = Snippets: Edit (HTML/Text)
+perm_general_snippets[translate] = Snippets: Manage translations
 perm_general_snippets[viewer] = Snippets: View only
 
 # Categories
@@ -391,3 +392,50 @@ snippets_tstr_settings_source_help = This language is used as source for DeepL b
 snippets_tstr_key_updated = Key updated
 snippets_tstr_click_to_edit_key = Double-click to edit key
 snippets_tstr_cancel = Cancel
+
+# Language Inheritance (Clang-Base)
+snippets_tstr_settings_fallback_title = Language Inheritance (Clang-Base)
+snippets_tstr_settings_fallback_enabled = Enable language inheritance
+snippets_tstr_settings_fallback_enabled_help = When enabled, missing translations are automatically inherited from the base language. This way, texts that are the same in all languages only need to be maintained once.
+snippets_tstr_settings_fallback_label = Base language (fallback)
+snippets_tstr_settings_fallback_help = Language whose values are used as fallback for empty translations. Usually the main language of the project.
+
+# Missing Placeholder Analysis
+snippets_tstr_analyze_title = Detect Missing Placeholders
+snippets_tstr_analyze_description = Scans all article content for [[ key ]] placeholders and compares them with defined translation keys. This helps you find placeholders that are used but not yet defined as translations.
+snippets_tstr_analyze_button = Analyze placeholders
+snippets_tstr_analyze_result_title = Analysis Result
+snippets_tstr_analyze_defined = Defined keys
+snippets_tstr_analyze_used_in_slices = Used in articles
+snippets_tstr_analyze_missing = Missing keys
+snippets_tstr_analyze_occurrences = Occurrences
+snippets_tstr_analyze_articles = Articles
+snippets_tstr_analyze_create = Create translation
+snippets_tstr_analyze_all_defined = All used placeholders are defined as translations.
+
+# XLIFF Export/Import
+snippets_xliff_panel_title = XLIFF for Translators
+snippets_xliff_export_description = Export translations in XLIFF 1.2 format – the industry standard for professional translation tools (SDL Trados, memoQ, Memsource, Phrase, etc.).
+snippets_xliff_source = Source language
+snippets_xliff_target = Target language
+snippets_xliff_select_target = Select target language
+snippets_xliff_export_button = Export XLIFF
+snippets_xliff_import_title = Import XLIFF
+snippets_xliff_import_description = Import a XLIFF file processed by a translator. The target language is automatically detected from the file.
+snippets_xliff_file = XLIFF file (.xliff, .xlf)
+snippets_xliff_create_missing = Create new keys automatically
+snippets_xliff_create_missing_help = When enabled, keys from the XLIFF file are automatically created as new translations if they don't exist yet.
+snippets_xliff_import_button = Import XLIFF
+snippets_xliff_analyze_button = Analyze XLIFF
+snippets_xliff_import_success = XLIFF import completed: {0} updated, {1} newly created, {2} skipped. Target language: {3}.
+snippets_xliff_error_no_target = Please select a target language.
+snippets_xliff_preview_title = XLIFF Import Preview
+snippets_xliff_preview_source_lang = Source language
+snippets_xliff_preview_target_lang = Target language
+snippets_xliff_preview_matched = matched
+snippets_xliff_preview_no_match = not matched
+snippets_xliff_preview_count = Translation units
+snippets_xliff_preview_existing = Existing keys
+snippets_xliff_preview_new = New keys
+snippets_xliff_preview_translated = Translated
+snippets_xliff_preview_untranslated = Untranslated
