@@ -440,3 +440,10 @@ snippets_xliff_preview_existing = Bestehende Schlüssel
 snippets_xliff_preview_new = Neue Schlüssel
 snippets_xliff_preview_translated = Übersetzt
 snippets_xliff_preview_untranslated = Nicht übersetzt
+
+# Extension Points
+snippets_settings_ep_title = Extension Points
+snippets_settings_ep_frontend = Frontend EP
+snippets_settings_ep_frontend_help = Standard: OUTPUT_FILTER. Bestimmt, wann die Ersetzungen im Frontend stattfinden.
+snippets_settings_ep_backend = Backend EP
+snippets_settings_ep_backend_help = Standard: SLICE_BE_PREVIEW. Bestimmt, wann die Ersetzungen in der Backend-Vorschau stattfinden.

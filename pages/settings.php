@@ -35,6 +35,8 @@ if ('save' === $func) {
         $addon->setConfig('tstr_source_clang_id', rex_request::post('tstr_source_clang_id', 'int', rex_clang::getStartId()));
         $addon->setConfig('tstr_fallback_enabled', rex_request::post('tstr_fallback_enabled', 'bool'));
         $addon->setConfig('tstr_fallback_clang_id', rex_request::post('tstr_fallback_clang_id', 'int', rex_clang::getStartId()));
+        $addon->setConfig('tstr_ep_backend', rex_request::post('tstr_ep_backend', 'string', 'SLICE_BE_PREVIEW'));
+        $addon->setConfig('tstr_ep_frontend', rex_request::post('tstr_ep_frontend', 'string', 'OUTPUT_FILTER'));
 
         SnippetsTranslate::clearCache();
         echo rex_view::success(rex_i18n::msg('settings_saved'));
@@ -111,6 +113,8 @@ $tstrSprogSyntax = (bool) $addon->getConfig('tstr_sprog_syntax', false);
 $tstrSourceClangId = (int) $addon->getConfig('tstr_source_clang_id', rex_clang::getStartId());
 $tstrFallbackEnabled = (bool) $addon->getConfig('tstr_fallback_enabled', false);
 $tstrFallbackClangId = (int) $addon->getConfig('tstr_fallback_clang_id', rex_clang::getStartId());
+$tstrEpBackend = (string) $addon->getConfig('tstr_ep_backend', 'SLICE_BE_PREVIEW');
+$tstrEpFrontend = (string) $addon->getConfig('tstr_ep_frontend', 'OUTPUT_FILTER');
 
 $content = '
 <form method="post" action="' . rex_url::currentBackendPage() . '">
@@ -222,6 +226,22 @@ foreach (rex_clang::getAll() as $fbClang) {
 $content .= '
             </select>
             <p class="help-block">' . $addon->i18n('snippets_tstr_settings_fallback_help') . '</p>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>' . $addon->i18n('snippets_settings_ep_title') . '</legend>
+        
+        <div class="form-group">
+            <label for="tstr_ep_frontend">' . $addon->i18n('snippets_settings_ep_frontend') . '</label>
+            <input type="text" class="form-control" id="tstr_ep_frontend" name="tstr_ep_frontend" value="' . rex_escape($tstrEpFrontend) . '">
+            <p class="help-block">' . $addon->i18n('snippets_settings_ep_frontend_help') . '</p>
+        </div>
+
+        <div class="form-group">
+            <label for="tstr_ep_backend">' . $addon->i18n('snippets_settings_ep_backend') . '</label>
+            <input type="text" class="form-control" id="tstr_ep_backend" name="tstr_ep_backend" value="' . rex_escape($tstrEpBackend) . '">
+            <p class="help-block">' . $addon->i18n('snippets_settings_ep_backend_help') . '</p>
         </div>
     </fieldset>
 
