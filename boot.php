@@ -15,6 +15,7 @@ $addon = rex_addon::get('snippets');
 
 // API-Funktion registrieren (Namespace-Registrierung, ab REDAXO 5.17)
 rex_api_function::register('snippets_translations', FriendsOfREDAXO\Snippets\Api\TranslationsApi::class);
+rex_api_function::register('snippets_tinymce_get', FriendsOfREDAXO\Snippets\Api\TinyMceSnippetsApi::class);
 
 // Berechtigungen registrieren
 if (rex::isBackend() && null !== rex::getUser()) {

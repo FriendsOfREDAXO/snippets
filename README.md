@@ -842,28 +842,41 @@ if (SnippetsInstaller::snippetExists('my_addon.footer')) {
 
 ### TinyMCE-Integration
 
-Das AddOn integriert sich nahtlos in den TinyMCE-Editor (AddOn `tinymce` ab Version 5).
+Das AddOn stellt zwei Plugins für den TinyMCE-Editor (`tinymce` ab Version 5) bereit.
 
-#### Installation & Aktivierung
+#### 1. Snippets-Plugin (Über das TinyMCE AddOn)
 
-Damit der Snippet-Button im Editor erscheint, muss das TinyMCE-Profil angepasst werden:
+Hierbei handelt es sich um das Standard-Plugin, das Snippets aus der `rex_snippets`-Tabelle einfügt.
 
+**Installation:**
 1. Gehe in das **TinyMCE AddOn** -> **Profile**.
-2. Wähle das gewünschte Profil (z.B. `default`) zum Bearbeiten aus.
-3. Füge im Feld **Plugins** den Eintrag `redaxo_snippets` hinzu.
-   Beispiel: `... image link media table redaxo_snippets ...`
-4. Füge im Feld **Toolbar** den Eintrag `redaxo_snippets` an der gewünschten Stelle hinzu.
-   Beispiel: `... | link unlink | redaxo_snippets | ...`
-5. Speichere das Profil.
+2. Füge im Feld **Plugins** den Eintrag `redaxo_snippets` hinzu.
+3. Füge im Feld **Toolbar** den Eintrag `redaxo_snippets` hinzu (Tool-Icon: Code-Symbol).
 
-#### Funktionsweise
+#### 2. String-Übersetzungen Plugin (Neu: snippets_rex)
 
-- Im Editor erscheint nun ein **Snippet-Icon** (Code-Symbol) in der Toolbar.
-- Klick darauf öffnet einen Dialog mit allen verfügbaren Snippets.
-- Wähle ein Snippet aus der Liste, um den Platzhalter `[[snippet:key]]` an der Cursor-Position einzufügen.
-- Wenn das Snippet Parameter unterstützt, können diese im Platzhalter ergänzt werden, z.B. `[[snippet:key|param1=wert]]`.
+Dieses Plugin erlaubt die Auswahl von mehrsprachigen **String-Übersetzungen** (Sprog-Alternative) direkt im Editor. Es unterstützt die Filterung nach Kategorien und ermöglicht eine sehr gezielte Auswahl.
 
-> **Hinweis:** Nur Benutzer mit Zugriff auf das Snippets-AddOn können die Snippet-Liste im Editor sehen.
+**Installation & Konfiguration:**
+1. Die Plugin-Datei befindet sich unter `assets/addons/snippets/js/tinymce_plugin.js`. Diese muss im REDAXO-Backend (z.B. über das `beaver`-AddOn oder ein Theme) eingebunden werden.
+2. In der TinyMCE-Konfiguration muss `snippets_rex` zu den `extra_plugins` hinzugefügt und `snippets_rex` in die Toolbar aufgenommen werden.
+3. Optional: Filterung nach Kategorien (nur Keys dieser Kategorien werden angezeigt):
+   ```javascript
+   {
+     "extra_plugins": "snippets_rex",
+     "toolbar": "snippets_rex ...",
+     "snippets_rex": {
+       "categories": "Header,Footer"
+     }
+   }
+   ```
+
+**Funktionsweise:**
+*   Im Editor erscheint ein **Snippet-Icon** (Sprechblasen-Symbol) in der Toolbar.
+*   Klick darauf öffnet ein Menü mit allen verfügbaren Übersetzungs-Keys.
+*   Eingefügt wird der Platzhalter `[[ key ]]`.
+
+> **Praxis-Tipp:** Nutzen Sie die Kategorien, um Redakteuren in Inhalts-Blöcken nur relevante Keys (z.B. Kategorie `Content`) anzubieten, während Admin-Bereiche die volle Auswahl haben.
 
 ### Sprog-Integration
 

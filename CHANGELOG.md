@@ -42,10 +42,19 @@
 - **Sprach-Vererbung (Clang-Base):** Basis-Sprache konfigurierbar, fehlende Übersetzungen werden automatisch aus der Fallback-Sprache übernommen – Texte die in allen Sprachen gleich sind müssen nur einmal gepflegt werden
 - **Fehlende Platzhalter erkennen:** Analyse-Tool in den Einstellungen scannt alle Artikelinhalte nach `[[ key ]]`-Platzhaltern und zeigt nicht definierte Schlüssel mit Artikelverweisen an – fehlende Übersetzungen können direkt angelegt werden
 - **XLIFF 1.2 Export/Import:** Übersetzungen im Industriestandard-Format für professionelle Übersetzer-Tools (SDL Trados, memoQ, Memsource, Phrase) exportieren und importieren – Quell-/Zielsprache pro Datei, `state`-Attribute, automatische Spracherkennung beim Import
-- **Backend Slice-Vorschau:** Platzhalter `[[ key ]]` werden jetzt auch in der Backend-Artikelbearbeitung aufgelöst – per `SLICE_SHOW` Extension Point, gezielt nur im gerenderten Slice-Output. Formulare, Textareas und UI-Elemente bleiben unberührt (besser als Sprogs blinder OUTPUT_FILTER)
+- **TinyMCE-Integration (snippets_rex):** Neues Plugin zur gezielten Auswahl von String-Übersetzungen (Sprog-Style `[[ key ]]`)
+  - Unterstützt Filterung nach Kategorien (z.B. nur "Content"-Keys im Artikeleditor)
+  - Eigene API-Schnittstelle für performante Keysuche
+  - Einfache Einbindung in bestehende TinyMCE-Profile
+- **Konfigurierbare Extension Points:** Die Ersetzung von Platzhaltern in Front- und Backend kann jetzt über die Einstellungen angepasst werden (z.B. Wechsel von `OUTPUT_FILTER` zu `PAGE_CONTENT` oder `SLICE_BE_PREVIEW`).
+- **Erweiterte Berechtigungen:** Neues Recht `snippets[translate]` ermöglicht es Redakteuren, ausschließlich Übersetzungen zu pflegen, ohne Zugriff auf AddOn-Einstellungen oder Kategorien zu erhalten.
+- **Backend-Optimierung:** Ersetzungen im Backend nutzen nun standardmäßig `SLICE_BE_PREVIEW`. Dies stellt sicher, dass Platzhalter in der Block-Vorschau aufgelöst werden, aber in Edit-Formularen und Textareas unangetastet bleiben (verhindert versehentliches Überschreiben von Keys).
 
 ### Verbessert
 
+- **Navigation & UI:**
+  - Die Seite "Kategorien" wurde für einen besseren Workflow direkt neben die "Einstellungen" verschoben.
+  - "Einstellungen" und "Import/Export" sind im Menü nun rechtsbündig (`pull-right`) ausgerichtet, um die primären Inhaltsseiten optisch abzugrenzen.
 - **Kategorie-Auswahl:** Selectpicker durch natives `<select>` mit slideToggle-Dropdown ersetzt – stabiler und ohne Bootstrap-Selectpicker-Abhängigkeit
 - **Responsive Tabelle:** Sticky Key-Spalte, horizontales Scrollen bei vielen Sprachen
 - **PJAX-Integration:** Alle Aktionen (Speichern, Löschen, Status-Toggle, Batch) nutzen PJAX für flüssige Navigation
