@@ -95,3 +95,29 @@ for ($i = 0; $i < $sql->getRows(); ++$i) {
 
     $sql->next();
 }
+
+// String-Übersetzungen-Tabellen (ab Version 1.3.0)
+rex_sql_table::get(rex::getTable('snippets_string'))
+    ->ensurePrimaryIdColumn()
+    ->ensureColumn(new rex_sql_column('key_name', 'varchar(191)', false))
+    ->ensureColumn(new rex_sql_column('category_id', 'int(10) unsigned', true))
+    ->ensureColumn(new rex_sql_column('status', 'tinyint(1)', false, '1'))
+    ->ensureGlobalColumns()
+    ->ensureIndex(new rex_sql_index('key_name', ['key_name'], rex_sql_index::UNIQUE))
+    ->ensureIndex(new rex_sql_index('status', ['status']))
+    ->ensure();
+
+rex_sql_table::get(rex::getTable('snippets_string_value'))
+    ->ensurePrimaryIdColumn()
+    ->ensureColumn(new rex_sql_column('string_id', 'int(10) unsigned', false))
+    ->ensureColumn(new rex_sql_column('clang_id', 'int(10) unsigned', false))
+    ->ensureColumn(new rex_sql_column('value', 'text', true))
+    ->ensureIndex(new rex_sql_index('unique_string_lang', ['string_id', 'clang_id'], rex_sql_index::UNIQUE))
+    ->ensureForeignKey(new rex_sql_foreign_key(
+        'fk_snippets_string_value_string',
+        rex::getTable('snippets_string'),
+        ['string_id' => 'id'],
+        rex_sql_foreign_key::CASCADE,
+        rex_sql_foreign_key::CASCADE
+    ))
+    ->ensure();

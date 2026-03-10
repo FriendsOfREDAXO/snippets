@@ -8,7 +8,11 @@
 
 use FriendsOfREDAXO\Snippets\Service\ReplacementService;
 use FriendsOfREDAXO\Snippets\Service\HtmlReplacementService;
+use FriendsOfREDAXO\Snippets\Service\SnippetsTranslate;
 use FriendsOfREDAXO\Snippets\Util\ContextDetector;
+
+// API-Funktion registrieren (Namespace-Registrierung, ab REDAXO 5.17)
+rex_api_function::register('snippets_translations', FriendsOfREDAXO\Snippets\Api\TranslationsApi::class);
 
 // Berechtigungen registrieren
 if (rex::isBackend() && null !== rex::getUser()) {
@@ -20,11 +24,17 @@ if (rex::isBackend() && null !== rex::getUser()) {
 // Assets im Backend laden
 if (rex::isBackend() && null !== rex::getUser()) {
     rex_view::addJsFile(rex_url::addonAssets('snippets', 'snippets.js'));
+    rex_view::addJsFile(rex_url::addonAssets('snippets', 'snippets-translations.js'));
     rex_view::addCssFile(rex_url::addonAssets('snippets', 'snippets.css'));
 }
 
 // Frontend: Snippet-Replacement
 if (!rex::isBackend()) {
+    // String-Übersetzungen ([[ key ]], optional {{ key }}) – läuft FRÜH, da andere Snippets darauf aufbauen können
+    rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
+        return SnippetsTranslate::replace($ep->getSubject(), rex_clang::getCurrentId());
+    }, rex_extension::EARLY);
+
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
         return ReplacementService::replace($ep->getSubject(), [
             'clang_id' => rex_clang::getCurrentId(),

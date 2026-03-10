@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.4.0] – 2026-03-10
+
+### Hinzugefügt
+
+- **String-Übersetzungen (Sprog-Alternative):** Neues Übersetzungssystem für mehrsprachige Strings, direkt im Snippets-AddOn integriert
+  - Eigene DB-Tabellen (`rex_snippets_string`, `rex_snippets_string_value`) für Key-Value-Übersetzungen pro Sprache
+  - Inline-Bearbeitung: Click-to-Edit direkt in der Tabelle, Escape zum Abbrechen, Enter zum Speichern
+  - Alle im Frontend verfügbaren Sprachen sind direkt sichtbar und editierbar
+  - Platzhalter-Syntax `[[ key ]]` – wird automatisch per OUTPUT_FILTER ersetzt
+  - Optionale Sprog-Kompatibilität: `{{ key }}`-Syntax zusätzlich aktivierbar in den Einstellungen
+  - **Sprog-Import:** Bestehende Sprog-Wildcards können per Klick importiert werden
+- **DeepL-Integration:** KI-Übersetzung per DeepL direkt im Backend
+  - Einzelübersetzung: DeepL-Button pro Sprachzelle, übersetzt und speichert sofort
+  - **Batch-Übersetzung:** Alle Strings einer Zielsprache serverseitig in einem Request übersetzen (PHP-only, robust)
+  - Nutzt den DeepL-API-Key aus dem WriteAssist-AddOn – kein separater Key nötig
+  - Automatisches Sprach-Mapping (REDAXO-Code → DeepL-Code), konfigurierbar in Einstellungen
+- **PHP-API für direkte Nutzung:**
+  - `SnippetsTranslate::get('key')` – übersetzten Wert in Modulen/Templates abrufen
+  - `SnippetsTranslate::get('key', 2)` – bestimmte Sprache
+  - `SnippetsTranslate::get('key', null, 'Fallback')` – mit Standardwert
+  - `SnippetsTranslate::replace($content, $clangId)` – Platzhalter in beliebigem Content ersetzen
+- **Verschachtelte Snippets:** Platzhalter `[[ key ]]` in Übersetzungswerten werden rekursiv aufgelöst (max. 5 Ebenen), Zirkelbezüge werden erkannt und ignoriert
+- **SnippetsInstaller API:** Neue Klasse für AddOn-Entwickler, um eigene Daten programmatisch zu installieren/entfernen
+  - `SnippetsInstaller::installTranslations()` – Übersetzungen mit Sprach-Codes installieren
+  - `SnippetsInstaller::installSnippets()` – Snippets installieren
+  - `SnippetsInstaller::installHtmlReplacements()` – HTML-Ersetzungen installieren
+  - `SnippetsInstaller::installFromFile()` – Import aus JSON-Export-Datei
+  - Drei Konflikt-Modi: `SKIP`, `OVERWRITE`, `FILL_EMPTY` (nur leere Sprachwerte ergänzen)
+  - Deinstallations-Methoden: `removeTranslationsByPrefix()`, `removeSnippetsByPrefix()`, `removeHtmlReplacementsByPrefix()`
+  - Existenz-Prüfung: `translationExists()`, `snippetExists()`
+- **Import/Export für Übersetzungen:** Translations können jetzt exportiert und importiert werden
+  - Portabler Export mit Sprach-Codes statt IDs – funktioniert zwischen verschiedenen REDAXO-Installationen
+  - Kategorien werden per Name exportiert und beim Import automatisch angelegt
+- **Zweistufiger Import:** Alle Importtypen (Snippets, HTML-Ersetzungen, Abkürzungen, Übersetzungen) zeigen jetzt eine Vorschau mit Konfliktanalyse, bevor der Import startet
+  - Anzeige von Typ, Anzahl, neuen vs. bestehenden Einträgen, Export-Datum
+  - Sprachmapping-Tabelle bei Übersetzungen: Zuordnung/Überspringen pro Sprache
+  - Automatische Erkennung passender lokaler Sprachen per Code
+- **Paginierung:** Bei vielen Keys wird die Übersetzungsliste paginiert (50 pro Seite)
+- **Seiten-Icons:** Alle AddOn-Unterseiten haben jetzt passende FontAwesome-Icons
+
+### Verbessert
+
+- **Kategorie-Auswahl:** Selectpicker durch natives `<select>` mit slideToggle-Dropdown ersetzt – stabiler und ohne Bootstrap-Selectpicker-Abhängigkeit
+- **Responsive Tabelle:** Sticky Key-Spalte, horizontales Scrollen bei vielen Sprachen
+- **PJAX-Integration:** Alle Aktionen (Speichern, Löschen, Status-Toggle, Batch) nutzen PJAX für flüssige Navigation
+
 ## [1.2.0] – 2026-03-09
 
 ### Behoben

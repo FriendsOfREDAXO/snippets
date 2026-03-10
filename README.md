@@ -8,20 +8,23 @@ Snippets können Texte sein oder kleine Code-Schnipsel die global verwendet werd
 Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fragmenten und automatische HTML-Manipulation mit PHP 8.4 DOM:
 
 - **Snippets** – Wiederverwendbare HTML/PHP-Fragmente mit Parametern
+- **String-Übersetzungen** – Mehrsprachige Key-Value-Übersetzungen (Sprog-Alternative) mit DeepL-Integration
 - **Filter** – 26+ Filter für Textformatierung
 - **HTML-Ersetzungen** – CSS-Selektoren, Regex und PHP-Callbacks
-- **PHP-API** – `Snippets::get()`, `Snippets::apply()` für PHP-Zugriff
+- **PHP-API** – `Snippets::get()`, `Snippets::apply()`, `SnippetsTranslate::get()` für PHP-Zugriff
 - **Scope-Kontrolle** – Templates, Kategorien, URLs, Backend-Seiten
 - **Berechtigungssystem** – Admin, Editor, Viewer Rollen
 
-### Neu in Version 1.2.0
+### Neu in Version 1.4.0
 
-- **Import-Fix**: JSON-Import auf der Import/Export-Seite verarbeitet Datei-Uploads wieder robust
-- **HTML-Replacement-Import/Export vollständig**: `scope_backend_request_pattern` wird jetzt mit exportiert und importiert
-- **Backend-Scope-Logik präzisiert**: Backend-Seiten und Backend-Request-Pattern werden kombiniert (ODER, sobald beide gesetzt sind)
-- **Request-Pattern flexibler**: `key=value` vergleicht Werte als Teilstring, z. B. `page=content/edit` trifft auch `page=content/edit&article_id=1`
-- **Edit-Kontexte sicherer**: HTML-Ersetzungen können im Backend-Edit-Kontext laufen, formularnahe Bereiche bleiben geschützt
-- **Kategorien mit Icons in UI**: Icons werden in Kategorien-Liste sowie in Kategorie-Selects der Snippet-Masken/Filter angezeigt
+- **String-Übersetzungen:** Neues mehrsprachiges Übersetzungssystem – eine schlanke Sprog-Alternative für String-Übersetzungen, direkt im Snippets-AddOn
+- **Inline-Bearbeitung:** Alle Sprachen in einer Tabelle, Click-to-Edit, sofortiges Speichern per AJAX
+- **DeepL-Integration:** KI-Übersetzung per DeepL – einzeln oder als Batch für eine komplette Zielsprache
+- **Nutzt WriteAssist-Token:** Kein separater API-Key nötig – DeepL-Key aus dem WriteAssist-AddOn wird automatisch verwendet
+- **PHP-API:** `SnippetsTranslate::get('key')` für direkten Zugriff in Modulen, Templates und PHP-Code
+- **Sprog-Import:** Bestehende Sprog-Wildcards können mit einem Klick übernommen werden
+- **Paginierung:** Übersetzungsliste mit Seitennavigation bei vielen Keys
+- **Seiten-Icons:** Alle Unterseiten haben passende FontAwesome-Icons
 
 ---
 
@@ -167,6 +170,89 @@ $snippet->getId();
 | `html` | HTML-Code, wird direkt ausgegeben |
 | `text` | Reiner Text, wird escaped |
 | `php` | PHP-Code mit Zugriff auf `$SNIPPET_PARAMS` (nur Admins) |
+
+---
+
+## String-Übersetzungen
+
+Das Snippets-AddOn enthält ein eigenes mehrsprachiges Übersetzungssystem – eine schlanke Alternative zu Sprog, spezialisiert auf String-Übersetzungen.
+
+### Funktionsweise
+
+Übersetzungsschlüssel werden mit der Syntax `[[ key ]]` im Content platziert und per OUTPUT_FILTER automatisch durch den passenden Wert der aktuellen Sprache ersetzt.
+
+```html
+<h1>[[ nav.home ]]</h1>
+<p>[[ footer.copyright ]]</p>
+<a href="/kontakt">[[ btn.contact ]]</a>
+```
+
+### PHP-API für Module und Templates
+
+Für direkten Zugriff in PHP – **ohne OUTPUT_FILTER** – steht die Service-Klasse zur Verfügung:
+
+```php
+use FriendsOfREDAXO\Snippets\Service\SnippetsTranslate;
+
+echo SnippetsTranslate::get('nav.home');                       // aktuelle Sprache
+echo SnippetsTranslate::get('nav.home', 2);                    // Sprach-ID 2
+echo SnippetsTranslate::get('nav.home', null, 'Startseite');   // mit Fallback
+
+// Platzhalter in beliebigem Content ersetzen
+$html = SnippetsTranslate::replace($content, rex_clang::getCurrentId());
+```
+
+### Verschachtelte Snippets
+
+Snippet-Werte können selbst wieder `[[ key ]]`-Platzhalter enthalten – diese werden **rekursiv aufgelöst** (max. 5 Ebenen).
+
+**Beispiel:**
+
+| Key | Wert |
+|-----|------|
+| `company.name` | `ACME GmbH` |
+| `footer.copyright` | `© 2026 [[ company.name ]]` |
+| `footer.full` | `[[ footer.copyright ]] – Alle Rechte vorbehalten` |
+
+**Ergebnis** von `[[ footer.full ]]`:
+
+```
+© 2026 ACME GmbH – Alle Rechte vorbehalten
+```
+
+Das funktioniert sowohl im OUTPUT_FILTER als auch per PHP-API:
+
+```php
+// Verschachtelte Platzhalter werden automatisch aufgelöst
+echo SnippetsTranslate::get('footer.full');
+// → "© 2026 ACME GmbH – Alle Rechte vorbehalten"
+```
+
+> **Hinweis:** Zirkuläre Referenzen (A → B → A) werden nach 5 Durchläufen abgebrochen – der nicht auflösbare Platzhalter bleibt dann stehen.
+
+### DeepL-Integration
+
+Wenn das **WriteAssist**-AddOn installiert und ein DeepL-API-Key konfiguriert ist, stehen KI-Übersetzungen zur Verfügung:
+
+- **Einzelübersetzung:** DeepL-Button (🔤) in jeder Sprachzelle – übersetzt den Quelltext und speichert sofort
+- **Batch-Übersetzung:** Zielsprache wählen → alle leeren (oder alle) Strings werden serverseitig per DeepL übersetzt
+
+Ein separater API-Key ist **nicht** nötig – der DeepL-Token aus WriteAssist wird automatisch verwendet.
+
+### Sprog-Kompatibilität
+
+- **Syntax:** Optional kann zusätzlich die `{{ key }}`-Syntax aktiviert werden (Einstellungen → „Sprog-Syntax unterstützen")
+- **Import:** Bestehende Sprog-Wildcards können mit einem Klick in die Snippets-Übersetzungen importiert werden (Admin-Bereich)
+- Das Sprog-AddOn wird dafür **nicht** benötigt – der Import liest direkt aus der `rex_sprog_wildcard`-Tabelle
+
+### Sprachmapping
+
+REDAXO-Sprachcodes werden automatisch auf DeepL-Codes gemappt (z. B. `de` → `DE`, `en` → `EN-GB`). Falls ein Code nicht erkannt wird, kann das Mapping in den Einstellungen manuell konfiguriert werden:
+
+```
+sl=SL
+hr=HR
+```
 
 ---
 
@@ -507,6 +593,162 @@ $filtered = FilterService::apply($text, [
 echo $filtered;
 ```
 
+### SnippetsInstaller API (für AddOn-Entwickler)
+
+Das Snippets-AddOn bietet eine **Installer-API**, mit der andere AddOns eigene Übersetzungen, Snippets und HTML-Ersetzungen programmatisch installieren, aktualisieren und entfernen können.
+
+#### Schnellstart
+
+```php
+<?php
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+// In eurer install.php oder update.php:
+if (rex_addon::get('snippets')->isAvailable()) {
+    SnippetsInstaller::installTranslations([
+        'my_addon.greeting' => ['de' => 'Hallo Welt', 'en' => 'Hello World'],
+        'my_addon.farewell' => ['de' => 'Auf Wiedersehen', 'en' => 'Goodbye'],
+    ]);
+}
+```
+
+#### Konflikt-Modi
+
+Jede `install*`-Methode akzeptiert einen `$conflictMode`-Parameter:
+
+| Modus | Konstante | Beschreibung |
+|-------|-----------|--------------|
+| **Skip** | `SnippetsInstaller::SKIP` | Bestehende Einträge überspringen (Standard) |
+| **Overwrite** | `SnippetsInstaller::OVERWRITE` | Bestehende Einträge komplett überschreiben |
+| **Fill Empty** | `SnippetsInstaller::FILL_EMPTY` | Nur leere Sprachwerte füllen, vorhandene Werte behalten (nur Translations) |
+
+`FILL_EMPTY` ist ideal für AddOn-Updates: Neue Sprachen werden ergänzt, ohne vom Benutzer angepasste Texte zu überschreiben.
+
+#### Übersetzungen installieren
+
+```php
+<?php
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+// Einfach: Key => [Sprach-Code => Wert]
+$result = SnippetsInstaller::installTranslations([
+    'shop.cart.empty' => ['de' => 'Warenkorb ist leer', 'en' => 'Cart is empty'],
+    'shop.cart.add'   => ['de' => 'In den Warenkorb', 'en' => 'Add to cart'],
+    'shop.cart.total'  => ['de' => 'Gesamtsumme', 'en' => 'Total'],
+], SnippetsInstaller::FILL_EMPTY);
+// $result = ['imported' => 3, 'skipped' => 0, 'updated' => 0]
+
+// Mit Kategorie und Icon
+SnippetsInstaller::installTranslations(
+    [
+        'shop.nav.home'  => ['de' => 'Startseite', 'en' => 'Home'],
+        'shop.nav.about' => ['de' => 'Über uns', 'en' => 'About'],
+    ],
+    SnippetsInstaller::SKIP,
+    'Shop',            // Kategoriename (wird erstellt falls nötig)
+    'fa-shopping-cart', // Icon für neue Kategorie
+);
+```
+
+> **Wichtig:** Sprachen werden per Code (`de`, `en`, `fr`, …) angegeben – nicht per ID. Dadurch funktioniert der Code in jeder REDAXO-Installation unabhängig von der Sprach-Konfiguration.
+
+#### Snippets installieren
+
+```php
+<?php
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+$result = SnippetsInstaller::installSnippets([
+    'my_addon.footer' => [
+        'content' => '<div class="footer">© {{ year }}</div>',
+        'title' => 'Footer',
+        'content_type' => 'html',    // html, text, php
+        'context' => 'frontend',     // frontend, backend, both
+    ],
+    'my_addon.copyright' => [
+        'content' => '© 2025 Meine Firma',
+        'title' => 'Copyright',
+    ],
+], SnippetsInstaller::SKIP);
+```
+
+#### HTML-Ersetzungen installieren
+
+```php
+<?php
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+$result = SnippetsInstaller::installHtmlReplacements([
+    'my_addon.lazy_images' => [
+        'type' => 'css_selector',
+        'search_value' => 'img:not([loading])',
+        'replacement' => 'loading="lazy"',
+        'position' => 'add_attribute',
+        'scope_context' => 'frontend',
+        'description' => 'Lazy Loading für alle Bilder',
+        'priority' => 10,
+    ],
+], SnippetsInstaller::SKIP);
+```
+
+#### Aus JSON-Datei installieren
+
+```php
+<?php
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+// Lädt eine zuvor exportierte JSON-Datei
+$result = SnippetsInstaller::installFromFile(
+    rex_path::addon('my_addon', 'data/translations.json'),
+    SnippetsInstaller::FILL_EMPTY,
+);
+```
+
+#### Einträge entfernen (Deinstallation)
+
+```php
+<?php
+// In eurer uninstall.php:
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+if (rex_addon::get('snippets')->isAvailable()) {
+    // Per Prefix: Entfernt alle Einträge die mit 'my_addon.' beginnen
+    SnippetsInstaller::removeTranslationsByPrefix('my_addon.');
+    SnippetsInstaller::removeSnippetsByPrefix('my_addon.');
+    SnippetsInstaller::removeHtmlReplacementsByPrefix('my_addon.');
+
+    // Oder einzelne Keys entfernen
+    SnippetsInstaller::removeTranslationsByKeys([
+        'my_addon.greeting',
+        'my_addon.farewell',
+    ]);
+}
+```
+
+#### Existenz prüfen
+
+```php
+<?php
+use FriendsOfREDAXO\Snippets\Service\SnippetsInstaller;
+
+if (SnippetsInstaller::translationExists('my_addon.greeting')) {
+    // Key existiert bereits
+}
+
+if (SnippetsInstaller::snippetExists('my_addon.footer')) {
+    // Snippet existiert bereits
+}
+```
+
+#### Best Practices für AddOn-Entwickler
+
+1. **Keys mit AddOn-Name prefixen**: `my_addon.section.key` – vermeidet Konflikte mit anderen AddOns
+2. **`FILL_EMPTY` in `update.php`** verwenden – ergänzt neue Sprachen ohne Benutzer-Anpassungen zu überschreiben
+3. **`SKIP` in `install.php`** verwenden – überschreibt keine vorhandenen Daten bei Neuinstallation
+4. **`snippets`-Verfügbarkeit prüfen** vor dem Aufruf: `if (rex_addon::get('snippets')->isAvailable())`
+5. **Aufräumen in `uninstall.php`** mit `removeByPrefix()` – hinterlässt keine verwaisten Daten
+6. **Sprach-Codes statt IDs** verwenden – macht den Code portabel
+
 ---
 
 ## Berechtigungen
@@ -629,10 +871,12 @@ Debug-Modus aktivieren → Fehler erscheinen als HTML-Kommentare:
 | Tabelle | Beschreibung |
 |---------|--------------|
 | `rex_snippets_snippet` | Snippets |
-| `rex_snippets_translation` | Übersetzungen |
+| `rex_snippets_translation` | Übersetzungen (Snippet-Werte pro Sprache) |
 | `rex_snippets_category` | Kategorien |
 | `rex_snippets_html_replacement` | HTML-Ersetzungen |
 | `rex_snippets_log` | Audit-Log |
+| `rex_snippets_string` | String-Übersetzungen (Keys, Kategorie, Status) |
+| `rex_snippets_string_value` | Übersetzungswerte pro Key und Sprache |
 
 ---
 

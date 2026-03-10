@@ -5,9 +5,10 @@ namespace FriendsOfREDAXO\Snippets\Service;
 use FriendsOfREDAXO\Snippets\Repository\SnippetRepository;
 use FriendsOfREDAXO\Snippets\Repository\HtmlReplacementRepository;
 use FriendsOfREDAXO\Snippets\Repository\AbbreviationRepository;
+use FriendsOfREDAXO\Snippets\Repository\TranslationStringRepository;
 
 /**
- * Service für Import/Export von Snippets, HTML-Ersetzungen und Abkürzungen
+ * Service für Import/Export von Snippets, HTML-Ersetzungen, Abkürzungen und Übersetzungen
  *
  * @package redaxo\snippets
  */
@@ -16,6 +17,7 @@ class ImportExportService
     public const TYPE_SNIPPETS = 'snippets';
     public const TYPE_HTML_REPLACEMENTS = 'html_replacements';
     public const TYPE_ABBREVIATIONS = 'abbreviations';
+    public const TYPE_TRANSLATIONS = 'translations';
 
     /**
      * Exportiert Snippets als JSON
@@ -179,13 +181,287 @@ class ImportExportService
     }
 
     /**
+     * Exportiert Übersetzungen (String-Translations) als JSON
+     *
+     * Sprachen werden per Code (de, en, fr) exportiert statt per ID,
+     * damit der Export zwischen verschiedenen REDAXO-Installationen portabel ist.
+     *
+     * @param array<int>|null $ids Nur bestimmte IDs exportieren, null = alle
+     * @return array{success: bool, data?: string, error?: string}
+     */
+    public static function exportTranslations(?array $ids = null): array
+    {
+        try {
+            $strings = TranslationStringRepository::findAll();
+
+            if (null !== $ids) {
+                $strings = array_filter($strings, static fn ($s) => in_array($s->getId(), $ids, true));
+            }
+
+            // Sprach-Code-Mapping: clang_id → code
+            $clangCodes = [];
+            foreach (\rex_clang::getAll() as $clang) {
+                $clangCodes[$clang->getId()] = $clang->getCode();
+            }
+
+            // Kategorien laden
+            $categories = self::loadCategories();
+
+            $exportData = [
+                'type' => self::TYPE_TRANSLATIONS,
+                'version' => '1.0',
+                'exported_at' => date('c'),
+                'languages' => array_values($clangCodes),
+                'count' => count($strings),
+                'items' => [],
+            ];
+
+            foreach ($strings as $string) {
+                $item = [
+                    'key' => $string->getKey(),
+                    'status' => $string->isActive() ? 1 : 0,
+                ];
+
+                // Kategorie per Name exportieren (nicht per ID)
+                $catId = $string->getCategoryId();
+                if (null !== $catId && $catId > 0 && isset($categories[$catId])) {
+                    $item['category'] = $categories[$catId]['name'];
+                    $catIcon = trim($categories[$catId]['icon'] ?? '');
+                    if ('' !== $catIcon) {
+                        $item['category_icon'] = $catIcon;
+                    }
+                }
+
+                // Werte per Sprach-Code statt ID
+                $values = $string->getValues();
+                $translations = [];
+                foreach ($values as $clangId => $value) {
+                    if (isset($clangCodes[$clangId]) && '' !== $value) {
+                        $translations[$clangCodes[$clangId]] = $value;
+                    }
+                }
+                $item['translations'] = $translations;
+
+                $exportData['items'][] = $item;
+            }
+
+            $json = json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+            if (false === $json) {
+                return ['success' => false, 'error' => 'JSON encoding failed'];
+            }
+
+            return ['success' => true, 'data' => $json];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Analysiert eine Import-Datei und gibt Vorschau/Konfliktinfo zurück
+     *
+     * Wird VOR dem tatsächlichen Import aufgerufen, um dem Benutzer
+     * eine Übersicht mit Sprachmapping und Konflikten zu zeigen.
+     *
+     * @return array{valid: bool, type?: string, count?: int, languages?: array<string, array{code: string, mapped: bool, clang_id: ?int, clang_name: ?string}>, new_keys?: int, existing_keys?: int, categories?: array<string>, error?: string}
+     */
+    public static function analyzeImport(string $json): array
+    {
+        $data = json_decode($json, true);
+
+        if (null === $data) {
+            return ['valid' => false, 'error' => 'Invalid JSON: ' . json_last_error_msg()];
+        }
+
+        if (!isset($data['type']) || !isset($data['items']) || !is_array($data['items'])) {
+            return ['valid' => false, 'error' => 'Invalid export format'];
+        }
+
+        $validTypes = [self::TYPE_SNIPPETS, self::TYPE_HTML_REPLACEMENTS, self::TYPE_ABBREVIATIONS, self::TYPE_TRANSLATIONS];
+        if (!in_array($data['type'], $validTypes, true)) {
+            return ['valid' => false, 'error' => 'Unknown type: ' . $data['type']];
+        }
+
+        $result = [
+            'valid' => true,
+            'type' => $data['type'],
+            'count' => count($data['items']),
+            'exported_at' => $data['exported_at'] ?? null,
+        ];
+
+        // Typ-spezifische Analyse
+        if (self::TYPE_TRANSLATIONS === $data['type']) {
+            $result = array_merge($result, self::analyzeTranslationsImport($data));
+        } elseif (self::TYPE_SNIPPETS === $data['type']) {
+            $result = array_merge($result, self::analyzeSnippetsImport($data['items']));
+        } elseif (self::TYPE_HTML_REPLACEMENTS === $data['type']) {
+            $result = array_merge($result, self::analyzeHtmlReplacementsImport($data['items']));
+        } elseif (self::TYPE_ABBREVIATIONS === $data['type']) {
+            $result = array_merge($result, self::analyzeAbbreviationsImport($data['items']));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Analysiert Translations-Import: Sprachmapping und Konflikte
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private static function analyzeTranslationsImport(array $data): array
+    {
+        $items = $data['items'] ?? [];
+        $exportedLangs = $data['languages'] ?? [];
+
+        // Alle im Export vorkommenden Sprach-Codes sammeln
+        $usedCodes = [];
+        foreach ($items as $item) {
+            if (isset($item['translations']) && is_array($item['translations'])) {
+                foreach (array_keys($item['translations']) as $code) {
+                    $usedCodes[(string) $code] = true;
+                }
+            }
+        }
+
+        // Merge mit languages-Header (falls vorhanden)
+        foreach ($exportedLangs as $code) {
+            $usedCodes[(string) $code] = true;
+        }
+
+        // Sprach-Mapping erstellen
+        $clangsByCode = [];
+        foreach (\rex_clang::getAll() as $clang) {
+            $clangsByCode[$clang->getCode()] = $clang;
+        }
+
+        $languages = [];
+        foreach (array_keys($usedCodes) as $code) {
+            $mapped = isset($clangsByCode[$code]);
+            $languages[$code] = [
+                'code' => $code,
+                'mapped' => $mapped,
+                'clang_id' => $mapped ? $clangsByCode[$code]->getId() : null,
+                'clang_name' => $mapped ? $clangsByCode[$code]->getName() : null,
+            ];
+        }
+
+        // Bestehende vs. neue Keys zählen
+        $newKeys = 0;
+        $existingKeys = 0;
+        foreach ($items as $item) {
+            $key = $item['key'] ?? '';
+            if ('' === $key) {
+                continue;
+            }
+            if (TranslationStringRepository::keyExists($key)) {
+                ++$existingKeys;
+            } else {
+                ++$newKeys;
+            }
+        }
+
+        // Kategorien sammeln
+        $categories = [];
+        foreach ($items as $item) {
+            if (isset($item['category']) && '' !== $item['category']) {
+                $categories[$item['category']] = true;
+            }
+        }
+
+        return [
+            'languages' => $languages,
+            'new_keys' => $newKeys,
+            'existing_keys' => $existingKeys,
+            'categories' => array_keys($categories),
+        ];
+    }
+
+    /**
+     * Analysiert Snippets-Import
+     *
+     * @param array<array<string, mixed>> $items
+     * @return array<string, mixed>
+     */
+    private static function analyzeSnippetsImport(array $items): array
+    {
+        $newKeys = 0;
+        $existingKeys = 0;
+        foreach ($items as $item) {
+            $key = $item['key_name'] ?? '';
+            if ('' === $key) {
+                continue;
+            }
+            $existing = SnippetRepository::getByKey($key);
+            if (null !== $existing) {
+                ++$existingKeys;
+            } else {
+                ++$newKeys;
+            }
+        }
+        return ['new_keys' => $newKeys, 'existing_keys' => $existingKeys];
+    }
+
+    /**
+     * Analysiert HTML-Replacements-Import
+     *
+     * @param array<array<string, mixed>> $items
+     * @return array<string, mixed>
+     */
+    private static function analyzeHtmlReplacementsImport(array $items): array
+    {
+        $newKeys = 0;
+        $existingKeys = 0;
+        foreach ($items as $item) {
+            $name = $item['name'] ?? '';
+            if ('' === $name) {
+                continue;
+            }
+            $existingId = HtmlReplacementRepository::nameExists($name);
+            if ($existingId > 0) {
+                ++$existingKeys;
+            } else {
+                ++$newKeys;
+            }
+        }
+        return ['new_keys' => $newKeys, 'existing_keys' => $existingKeys];
+    }
+
+    /**
+     * Analysiert Abkürzungen-Import
+     *
+     * @param array<array<string, mixed>> $items
+     * @return array<string, mixed>
+     */
+    private static function analyzeAbbreviationsImport(array $items): array
+    {
+        $newKeys = 0;
+        $existingKeys = 0;
+        foreach ($items as $item) {
+            $abbr = $item['abbr'] ?? '';
+            if ('' === $abbr) {
+                continue;
+            }
+            $language = isset($item['language']) ? (int) $item['language'] : 0;
+            $existingId = AbbreviationRepository::exists($abbr, $language);
+            if ($existingId > 0) {
+                ++$existingKeys;
+            } else {
+                ++$newKeys;
+            }
+        }
+        return ['new_keys' => $newKeys, 'existing_keys' => $existingKeys];
+    }
+
+    /**
      * Importiert Daten aus JSON
      *
      * @param string $json JSON-String
      * @param bool $overwrite Bestehende Einträge überschreiben
+     * @param array<string, int>|null $languageMapping Sprach-Mapping für Translations: source_code => target_clang_id
      * @return array{success: bool, imported?: int, skipped?: int, error?: string}
      */
-    public static function import(string $json, bool $overwrite = false): array
+    public static function import(string $json, bool $overwrite = false, ?array $languageMapping = null): array
     {
         try {
             $data = json_decode($json, true);
@@ -202,6 +478,7 @@ class ImportExportService
                 self::TYPE_SNIPPETS => self::importSnippets($data['items'], $overwrite),
                 self::TYPE_HTML_REPLACEMENTS => self::importHtmlReplacements($data['items'], $overwrite),
                 self::TYPE_ABBREVIATIONS => self::importAbbreviations($data['items'], $overwrite),
+                self::TYPE_TRANSLATIONS => self::importTranslations($data['items'], $overwrite, $languageMapping),
                 default => ['success' => false, 'error' => 'Unknown type: ' . $data['type']],
             };
         } catch (\Exception $e) {
@@ -371,6 +648,123 @@ class ImportExportService
     }
 
     /**
+     * Importiert Übersetzungen (String-Translations)
+     *
+     * Unterstützt Sprachmapping: Sprach-Codes aus dem Export werden auf
+     * lokale clang_ids gemappt. Nicht gemappte Sprachen werden ignoriert.
+     *
+     * @param array<array<string, mixed>> $items
+     * @param bool $overwrite Bestehende Keys überschreiben
+     * @param array<string, int>|null $languageMapping source_code => target_clang_id, null = Auto-Mapping per Code
+     * @return array{success: bool, imported: int, skipped: int, languages_mapped?: int, languages_skipped?: int}
+     */
+    private static function importTranslations(array $items, bool $overwrite, ?array $languageMapping = null): array
+    {
+        // Auto-Mapping wenn kein Mapping übergeben
+        if (null === $languageMapping) {
+            $languageMapping = [];
+            foreach (\rex_clang::getAll() as $clang) {
+                $languageMapping[$clang->getCode()] = $clang->getId();
+            }
+        }
+
+        // Kategorien-Cache aufbauen (name → id)
+        $existingCategories = self::loadCategories();
+        $categoryNameMap = [];
+        foreach ($existingCategories as $catId => $catData) {
+            $categoryNameMap[mb_strtolower($catData['name'])] = $catId;
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        $langsMapped = count($languageMapping);
+        $langsSkipped = 0;
+
+        foreach ($items as $item) {
+            $key = $item['key'] ?? '';
+            if ('' === $key) {
+                ++$skipped;
+                continue;
+            }
+
+            // Prüfen ob Key existiert
+            $existing = TranslationStringRepository::getByKey($key);
+
+            if (null !== $existing && !$overwrite) {
+                ++$skipped;
+                continue;
+            }
+
+            // Kategorie auflösen (per Name)
+            $categoryId = null;
+            if (isset($item['category']) && '' !== $item['category']) {
+                $catNameLower = mb_strtolower($item['category']);
+                if (isset($categoryNameMap[$catNameLower])) {
+                    $categoryId = $categoryNameMap[$catNameLower];
+                } else {
+                    // Kategorie erstellen
+                    $categoryId = self::createCategory(
+                        $item['category'],
+                        $item['category_icon'] ?? 'fa-folder'
+                    );
+                    $categoryNameMap[$catNameLower] = $categoryId;
+                }
+            }
+
+            // String speichern
+            $data = [
+                'key_name' => $key,
+                'category_id' => $categoryId ?? 0,
+                'status' => (int) ($item['status'] ?? 1),
+            ];
+
+            if (null !== $existing) {
+                $data['id'] = $existing->getId();
+            }
+
+            $stringId = TranslationStringRepository::save($data);
+
+            // Werte per Sprach-Mapping speichern
+            if (isset($item['translations']) && is_array($item['translations'])) {
+                foreach ($item['translations'] as $langCode => $value) {
+                    $langCode = (string) $langCode;
+                    if (isset($languageMapping[$langCode])) {
+                        $clangId = $languageMapping[$langCode];
+                        TranslationStringRepository::saveValue($stringId, $clangId, $value);
+                    }
+                }
+            }
+
+            ++$imported;
+        }
+
+        // Zählen wieviele Sprachen nicht gemappt werden konnten
+        $allExportCodes = [];
+        foreach ($items as $item) {
+            if (isset($item['translations']) && is_array($item['translations'])) {
+                foreach (array_keys($item['translations']) as $code) {
+                    $allExportCodes[(string) $code] = true;
+                }
+            }
+        }
+        foreach (array_keys($allExportCodes) as $code) {
+            if (!isset($languageMapping[$code])) {
+                ++$langsSkipped;
+            }
+        }
+
+        SnippetsTranslate::clearCache();
+
+        return [
+            'success' => true,
+            'imported' => $imported,
+            'skipped' => $skipped,
+            'languages_mapped' => $langsMapped,
+            'languages_skipped' => $langsSkipped,
+        ];
+    }
+
+    /**
      * Holt Übersetzungen für ein Snippet
      *
      * @return array<int, string>
@@ -437,7 +831,8 @@ class ImportExportService
             return ['valid' => false, 'error' => 'Missing type field'];
         }
 
-        if (!in_array($data['type'], [self::TYPE_SNIPPETS, self::TYPE_HTML_REPLACEMENTS, self::TYPE_ABBREVIATIONS], true)) {
+        $validTypes = [self::TYPE_SNIPPETS, self::TYPE_HTML_REPLACEMENTS, self::TYPE_ABBREVIATIONS, self::TYPE_TRANSLATIONS];
+        if (!in_array($data['type'], $validTypes, true)) {
             return ['valid' => false, 'error' => 'Unknown type: ' . $data['type']];
         }
 
@@ -450,5 +845,42 @@ class ImportExportService
             'type' => $data['type'],
             'count' => count($data['items']),
         ];
+    }
+
+    /**
+     * Lädt alle Snippet-Kategorien
+     *
+     * @return array<int, array{name: string, icon: string}>
+     */
+    private static function loadCategories(): array
+    {
+        $sql = \rex_sql::factory();
+        $sql->setQuery('SELECT id, name, icon FROM ' . \rex::getTable('snippets_category') . ' ORDER BY name');
+
+        $categories = [];
+        for ($i = 0; $i < $sql->getRows(); ++$i) {
+            $categories[(int) $sql->getValue('id')] = [
+                'name' => (string) $sql->getValue('name'),
+                'icon' => (string) $sql->getValue('icon'),
+            ];
+            $sql->next();
+        }
+
+        return $categories;
+    }
+
+    /**
+     * Erstellt eine Kategorie und gibt die ID zurück
+     */
+    private static function createCategory(string $name, string $icon = 'fa-folder'): int
+    {
+        $sql = \rex_sql::factory();
+        $sql->setTable(\rex::getTable('snippets_category'));
+        $sql->setValue('name', $name);
+        $sql->setValue('icon', $icon);
+        $sql->setValue('sort_order', 100);
+        $sql->insert();
+
+        return (int) $sql->getLastId();
     }
 }

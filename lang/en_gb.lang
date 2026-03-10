@@ -278,28 +278,116 @@ status_inactive = Inactive
 # Import/Export
 snippets_import_export = Import/Export
 export_title = Export Data
-export_description = Export snippets, HTML replacements or abbreviations as JSON file.
+export_description = Export snippets, HTML replacements, abbreviations or translations as JSON file.
 export_panel_title = Export
 export_type_snippets = Snippets
 export_type_html_replacements = HTML Replacements
 export_type_abbreviations = Abbreviations
+export_type_translations = Translations
 export_button = Export
 
+# String Translations (Sprog replacement)
+snippets_tstr_nav = Translations
+snippets_tstr_title = String Translations
+snippets_tstr_search_placeholder = Search key or text...
+snippets_tstr_add = Add Translation
+snippets_tstr_key = Key
+snippets_tstr_key_help = Unique key (a-z, 0-9, -, _, .). Dots allow grouping, e.g. nav.home
+snippets_tstr_empty = No translations yet
+snippets_tstr_count = {0} translation(s)
+snippets_tstr_saved = Translation saved
+snippets_tstr_value_saved = Value saved
+snippets_tstr_added = Translation added
+snippets_tstr_deleted = Translation deleted
+snippets_tstr_delete_confirm = Really delete this translation? All language values will be lost.
+snippets_tstr_error_key_empty = Please enter a key
+snippets_tstr_error_key_exists = An entry with this key already exists
+snippets_tstr_save_all = Save all changes
+snippets_tstr_deepl_translate = Translate with DeepL
+snippets_tstr_deepl_available = DeepL translation available
+snippets_tstr_click_to_edit = Click to edit
+snippets_tstr_lang_count = {0} language(s)
+snippets_tstr_batch_title = Batch translation:
+snippets_tstr_batch_empty_only = Empty fields only
+snippets_tstr_batch_start = Translate all
+snippets_tstr_usage_title = Usage
+snippets_tstr_usage_text = Use placeholders with double square brackets: [[ key ]]. These are automatically replaced in the frontend with the translation for the current language.
+snippets_tstr_sprog_syntax_info = Sprog compatibility is enabled: The {{ key }} syntax is also recognized.
+snippets_tstr_settings_title = DeepL Language Mapping
+snippets_tstr_settings_syntax_title = Placeholder Syntax
+snippets_tstr_settings_syntax_default = Default syntax
+snippets_tstr_settings_syntax_default_help = Placeholders use double square brackets, e.g. [[ nav.home ]]. This avoids conflicts with Sprog or template engines.
+snippets_tstr_settings_sprog_syntax = Also enable Sprog syntax {{ key }}
+snippets_tstr_settings_sprog_syntax_help = If enabled, placeholders in Sprog syntax {{ key }} will also be replaced. Useful when migrating from Sprog or running both systems in parallel.
+snippets_tstr_import_sprog_title = Import from Sprog
+snippets_tstr_import_sprog_text = {0} wildcard(s) found in Sprog. These can be imported as translation strings.
+snippets_tstr_import_sprog_btn = Import {0} wildcard(s)
+snippets_tstr_import_sprog_overwrite = Overwrite existing entries
+snippets_tstr_import_sprog_overwrite_help = If enabled, entries with the same key will be updated. Otherwise they will be skipped.
+snippets_tstr_import_sprog_success = Sprog import completed: {0} imported, {1} skipped.
+snippets_tstr_import_sprog_not_available = The Sprog addon is not available.
+snippets_tstr_settings_mapping = Custom Language Mapping
+snippets_tstr_settings_mapping_help = Format: redaxo_code=DEEPL_CODE (one mapping per line). Example: en_gb=EN-GB. Only needed if the automatic mapping doesn't work correctly.
+
 import_title = Import Data
-import_description = Import previously exported JSON files.
+import_description = Import previously exported JSON files. The file will be analyzed first so you can review conflicts and language mapping.
 import_panel_title = Import
 import_file = Select JSON file
-import_file_help = Select a previously exported JSON file.
+import_file_help = Select a previously exported JSON file. After uploading you will see a preview.
 import_overwrite = Overwrite existing entries
 import_overwrite_help = If enabled, existing entries with the same key/name will be overwritten. Otherwise they will be skipped.
 import_button = Import
+import_analyze_button = Analyze file
+import_confirm_button = Start import
+import_cancel_button = Cancel
 import_success = Import successful: {0} imported, {1} skipped.
 import_error_file_too_large = The file is too large.
 import_error_no_file = Please select a file.
 import_error_upload = Error uploading the file.
 import_error_read = Could not read the file.
+import_error_no_data = No import data available. Please upload the file again.
+import_translations_lang_info = (Languages: {0} mapped, {1} skipped)
+
+# Import Preview
+import_preview_panel_title = Import Preview
+import_preview_title = Import File Analysis
+import_preview_type = Type
+import_preview_count = Total entries
+import_preview_new = New entries
+import_preview_new_label = new
+import_preview_existing = Existing entries
+import_preview_existing_label = already exists
+import_preview_exported_at = Exported at
+
+# Language Mapping
+import_lang_mapping_title = Language Mapping
+import_lang_mapping_help = The export file contains translations in the following languages. Assign each language to a local REDAXO language or skip it.
+import_lang_source = Source code
+import_lang_target = Target language
+import_lang_status = Status
+import_lang_skip = Skip
+import_lang_skip_label = skip
+import_lang_auto_mapped = automatic
+import_lang_unmapped = not found
+import_lang_not_mapped = not mapped
+
+# Import Categories
+import_categories_title = Categories in import
+import_categories_help = The following categories are included in the import file. Missing categories will be created automatically.
 
 import_export_info_panel = Information
 import_export_info_title = Import/Export Notes
-import_export_info_text = Export creates a JSON file with all entries of the selected area. Import restores the data. Note that imported data may have the same key/name as existing entries.
+import_export_info_text = Export creates a JSON file with all entries of the selected area. During import, data is analyzed and shown as a preview before importing. For translations you can map or skip languages.
 import_export_format_title = JSON Format
+import_export_translations_format_title = Translations Format
+import_export_translations_format_text = Translations are exported portably with language codes (not IDs) and category names. Mapping is done automatically during import.
+snippets_tstr_page_info = Page {0} of {1}
+snippets_tstr_batch_done = {0} translation(s) saved
+snippets_tstr_batch_source_equals_target = Source and target language must not be identical
+snippets_tstr_category_updated = Category updated
+snippets_tstr_settings_source_title = Source language for translations
+snippets_tstr_settings_source_label = Source language
+snippets_tstr_settings_source_help = This language is used as source for DeepL batch translations. Usually this is the default language where all texts are maintained first.
+snippets_tstr_key_updated = Key updated
+snippets_tstr_click_to_edit_key = Double-click to edit key
+snippets_tstr_cancel = Cancel

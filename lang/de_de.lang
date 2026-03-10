@@ -286,21 +286,109 @@ export_type_html_replacements = HTML-Ersetzungen
 export_type_abbreviations = Abkürzungen
 export_button = Exportieren
 
+# String-Übersetzungen (Sprog-Ersatz)
+snippets_tstr_nav = Übersetzungen
+snippets_tstr_title = String-Übersetzungen
+snippets_tstr_search_placeholder = Schlüssel oder Text suchen...
+snippets_tstr_add = Übersetzung hinzufügen
+snippets_tstr_key = Schlüssel
+snippets_tstr_key_help = Eindeutiger Schlüssel (a-z, 0-9, -, _, .). Punkte erlauben Gruppierung, z.B. nav.home
+snippets_tstr_empty = Noch keine Übersetzungen vorhanden
+snippets_tstr_count = {0} Übersetzung(en)
+snippets_tstr_saved = Übersetzung wurde gespeichert
+snippets_tstr_value_saved = Wert wurde gespeichert
+snippets_tstr_added = Übersetzung wurde hinzugefügt
+snippets_tstr_deleted = Übersetzung wurde gelöscht
+snippets_tstr_delete_confirm = Diese Übersetzung wirklich löschen? Alle Sprachwerte gehen verloren.
+snippets_tstr_error_key_empty = Bitte geben Sie einen Schlüssel ein
+snippets_tstr_error_key_exists = Ein Eintrag mit diesem Schlüssel existiert bereits
+snippets_tstr_save_all = Alle Änderungen speichern
+snippets_tstr_deepl_translate = Mit DeepL übersetzen
+snippets_tstr_deepl_available = DeepL-Übersetzung verfügbar
+snippets_tstr_click_to_edit = Klicken zum Bearbeiten
+snippets_tstr_lang_count = {0} Sprache(n)
+snippets_tstr_batch_title = Batch-Übersetzung:
+snippets_tstr_batch_empty_only = Nur leere Felder
+snippets_tstr_batch_start = Alle übersetzen
+snippets_tstr_usage_title = Verwendung
+snippets_tstr_usage_text = Platzhalter mit doppelten eckigen Klammern verwenden: [[ key ]]. Diese werden im Frontend automatisch durch die Übersetzung der aktuellen Sprache ersetzt.
+snippets_tstr_sprog_syntax_info = Sprog-Kompatibilität ist aktiviert: Zusätzlich wird auch die {{ key }}-Syntax erkannt.
+snippets_tstr_settings_title = DeepL-Sprachmapping
+snippets_tstr_settings_syntax_title = Platzhalter-Syntax
+snippets_tstr_settings_syntax_default = Standard-Syntax
+snippets_tstr_settings_syntax_default_help = Platzhalter werden mit doppelten eckigen Klammern geschrieben, z.B. [[ nav.home ]]. Dadurch gibt es keine Konflikte mit Sprog oder Template-Engines.
+snippets_tstr_settings_sprog_syntax = Zusätzlich Sprog-Syntax {{ key }} aktivieren
+snippets_tstr_settings_sprog_syntax_help = Wenn aktiviert, werden auch Platzhalter in der Sprog-Schreibweise {{ key }} ersetzt. Nützlich bei Migration von Sprog oder wenn beide Systeme parallel laufen.
+snippets_tstr_import_sprog_title = Import aus Sprog
+snippets_tstr_import_sprog_text = Es wurden {0} Wildcard(s) in Sprog gefunden. Diese können als Übersetzungs-Strings importiert werden.
+snippets_tstr_import_sprog_btn = {0} Wildcard(s) importieren
+snippets_tstr_import_sprog_overwrite = Bestehende Einträge überschreiben
+snippets_tstr_import_sprog_overwrite_help = Wenn aktiviert, werden Einträge mit gleichem Schlüssel aktualisiert. Ansonsten werden sie übersprungen.
+snippets_tstr_import_sprog_success = Sprog-Import abgeschlossen: {0} importiert, {1} übersprungen.
+snippets_tstr_import_sprog_not_available = Das Sprog-Addon ist nicht verfügbar.
+snippets_tstr_settings_mapping = Benutzerdefiniertes Sprachmapping
+snippets_tstr_settings_mapping_help = Format: redaxo_code=DEEPL_CODE (eine Zuordnung pro Zeile). Beispiel: en_gb=EN-GB. Wird nur benötigt, wenn das automatische Mapping nicht passt.
+
 import_title = Daten importieren
-import_description = Importieren Sie zuvor exportierte JSON-Dateien.
+import_description = Importieren Sie zuvor exportierte JSON-Dateien. Die Datei wird zuerst analysiert, damit Sie Konflikte und Sprachmapping prüfen können.
 import_panel_title = Import
 import_file = JSON-Datei auswählen
-import_file_help = Wählen Sie eine zuvor exportierte JSON-Datei aus.
+import_file_help = Wählen Sie eine zuvor exportierte JSON-Datei aus. Nach dem Hochladen erhalten Sie eine Vorschau.
 import_overwrite = Bestehende Einträge überschreiben
 import_overwrite_help = Wenn aktiviert, werden bestehende Einträge mit gleichem Schlüssel/Namen überschrieben. Ansonsten werden sie übersprungen.
 import_button = Importieren
+import_analyze_button = Datei analysieren
+import_confirm_button = Import starten
+import_cancel_button = Abbrechen
 import_success = Import erfolgreich: {0} importiert, {1} übersprungen.
 import_error_file_too_large = Die Datei ist zu groß.
 import_error_no_file = Bitte wählen Sie eine Datei aus.
 import_error_upload = Fehler beim Hochladen der Datei.
 import_error_read = Datei konnte nicht gelesen werden.
+import_error_no_data = Keine Import-Daten vorhanden. Bitte laden Sie die Datei erneut hoch.
+import_translations_lang_info = (Sprachen: {0} zugeordnet, {1} übersprungen)
+
+# Import Vorschau
+import_preview_panel_title = Import-Vorschau
+import_preview_title = Analyse der Import-Datei
+import_preview_type = Typ
+import_preview_count = Einträge gesamt
+import_preview_new = Neue Einträge
+import_preview_new_label = neu
+import_preview_existing = Bestehende Einträge
+import_preview_existing_label = bereits vorhanden
+import_preview_exported_at = Exportiert am
+
+# Sprachmapping
+import_lang_mapping_title = Sprachmapping
+import_lang_mapping_help = Die Export-Datei enthält Übersetzungen in folgenden Sprachen. Ordnen Sie jede Sprache einer lokalen REDAXO-Sprache zu oder überspringen Sie sie.
+import_lang_source = Quell-Code
+import_lang_target = Ziel-Sprache
+import_lang_status = Status
+import_lang_skip = Überspringen
+import_lang_skip_label = überspringen
+import_lang_auto_mapped = automatisch
+import_lang_unmapped = nicht gefunden
+import_lang_not_mapped = nicht zugeordnet
+
+# Import Kategorien
+import_categories_title = Kategorien im Import
+import_categories_help = Folgende Kategorien sind in der Import-Datei enthalten. Nicht vorhandene Kategorien werden automatisch angelegt.
+
+export_type_translations = Übersetzungen (Translations)
 
 import_export_info_panel = Informationen
-import_export_info_title = Hinweise zum Import/Export
-import_export_info_text = Der Export erstellt eine JSON-Datei mit allen Einträgen des gewählten Bereichs. Beim Import werden die Daten wiederhergestellt. Achten Sie darauf, dass importierte Daten den gleichen Schlüssel/Namen haben können wie bestehende Einträge.
+import_export_info_text = Der Export erstellt eine JSON-Datei mit allen Einträgen des gewählten Bereichs. Beim Import werden die Daten analysiert und als Vorschau angezeigt, bevor der Import startet. Bei Übersetzungen können Sie Sprachen zuordnen oder überspringen.
 import_export_format_title = JSON-Format
+import_export_translations_format_title = Translations-Format
+import_export_translations_format_text = Übersetzungen werden portabel mit Sprach-Codes (statt IDs) und Kategorie-Namen exportiert. Beim Import wird automatisch gemappt.
+snippets_tstr_page_info = Seite {0} von {1}
+snippets_tstr_batch_done = {0} Übersetzung(en) gespeichert
+snippets_tstr_batch_source_equals_target = Quell- und Zielsprache dürfen nicht identisch sein
+snippets_tstr_category_updated = Kategorie aktualisiert
+snippets_tstr_settings_source_title = Quellsprache für Übersetzungen
+snippets_tstr_settings_source_label = Quellsprache
+snippets_tstr_settings_source_help = Diese Sprache wird als Quelle für DeepL-Batch-Übersetzungen verwendet. In der Regel ist das die Standardsprache, in der alle Texte zuerst gepflegt werden.
+snippets_tstr_key_updated = Schlüssel aktualisiert
+snippets_tstr_click_to_edit_key = Doppelklick zum Bearbeiten des Schlüssels
+snippets_tstr_cancel = Abbrechen

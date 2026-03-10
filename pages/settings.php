@@ -7,6 +7,8 @@
  */
 
 use FriendsOfREDAXO\Snippets\Service\PermissionService;
+use FriendsOfREDAXO\Snippets\Repository\TranslationStringRepository;
+use FriendsOfREDAXO\Snippets\Service\SnippetsTranslate;
 
 // Berechtigungsprüfung
 if (!PermissionService::isAdmin()) {
@@ -28,8 +30,70 @@ if ('save' === $func) {
         $addon->setConfig('debug_mode', rex_request::post('debug_mode', 'bool'));
         $addon->setConfig('html_replacement_allow_snippets', rex_request::post('html_replacement_allow_snippets', 'bool'));
         $addon->setConfig('abbreviation_exclude_selectors', rex_request::post('abbreviation_exclude_selectors', 'string', ''));
+        $addon->setConfig('deepl_language_mapping', rex_request::post('deepl_language_mapping', 'string', ''));
+        $addon->setConfig('tstr_sprog_syntax', rex_request::post('tstr_sprog_syntax', 'bool'));
+        $addon->setConfig('tstr_source_clang_id', rex_request::post('tstr_source_clang_id', 'int', rex_clang::getStartId()));
 
         echo rex_view::success(rex_i18n::msg('settings_saved'));
+    }
+}
+
+// Sprog-Import
+if ('import_sprog' === $func) {
+    if (!$csrfToken->isValid()) {
+        echo rex_view::error(rex_i18n::msg('csrf_token_invalid'));
+    } elseif (!rex_addon::get('sprog')->isAvailable()) {
+        echo rex_view::error(rex_i18n::msg('snippets_tstr_import_sprog_not_available'));
+    } else {
+        $overwrite = rex_request::post('import_overwrite', 'bool', false);
+
+        $sql = rex_sql::factory();
+        $sql->setQuery('SELECT wildcard, `replace`, clang_id FROM ' . rex::getTable('sprog_wildcard') . ' ORDER BY wildcard, clang_id');
+
+        $imported = 0;
+        $skipped = 0;
+        $wildcardMap = [];
+
+        for ($i = 0; $i < $sql->getRows(); ++$i) {
+            $wildcard = (string) $sql->getValue('wildcard');
+            $replaceValue = (string) $sql->getValue('replace');
+            $clangId = (int) $sql->getValue('clang_id');
+
+            if ('' === $wildcard) {
+                $sql->next();
+                continue;
+            }
+
+            if (!isset($wildcardMap[$wildcard])) {
+                $wildcardMap[$wildcard] = [];
+            }
+            $wildcardMap[$wildcard][$clangId] = $replaceValue;
+            $sql->next();
+        }
+
+        foreach ($wildcardMap as $wildcard => $values) {
+            $existing = TranslationStringRepository::getByKey($wildcard);
+
+            if (null !== $existing && !$overwrite) {
+                ++$skipped;
+                continue;
+            }
+
+            if (null !== $existing) {
+                TranslationStringRepository::saveValues($existing->getId(), $values);
+                ++$imported;
+            } else {
+                $newId = TranslationStringRepository::save([
+                    'key_name' => $wildcard,
+                    'status' => 1,
+                ]);
+                TranslationStringRepository::saveValues($newId, $values);
+                ++$imported;
+            }
+        }
+
+        SnippetsTranslate::clearCache();
+        echo rex_view::success(rex_i18n::msg('snippets_tstr_import_sprog_success', (string) $imported, (string) $skipped));
     }
 }
 
@@ -39,6 +103,9 @@ $sprogAbbrevEnabled = (bool) $addon->getConfig('sprog_abbrev_enabled', true);
 $debugMode = (bool) $addon->getConfig('debug_mode', false);
 $htmlReplacementAllowSnippets = (bool) $addon->getConfig('html_replacement_allow_snippets', false);
 $abbreviationExcludeSelectors = (string) $addon->getConfig('abbreviation_exclude_selectors', "a\nnav\ncode\npre");
+$deeplLanguageMapping = (string) $addon->getConfig('deepl_language_mapping', '');
+$tstrSprogSyntax = (bool) $addon->getConfig('tstr_sprog_syntax', false);
+$tstrSourceClangId = (int) $addon->getConfig('tstr_source_clang_id', rex_clang::getStartId());
 
 $content = '
 <form method="post" action="' . rex_url::currentBackendPage() . '">
@@ -90,8 +157,65 @@ $content .= '
             <p class="help-block">' . $addon->i18n('abbreviation_exclude_selectors_info') . '</p>
         </div>
     </fieldset>
-    
+
     <fieldset>
+        <legend>' . rex_i18n::msg('snippets_tstr_settings_syntax_title') . '</legend>
+        
+        <div class="alert alert-info">
+            <strong>' . rex_i18n::msg('snippets_tstr_settings_syntax_default') . ':</strong>
+            <code>[[ key ]]</code><br>
+            <small>' . rex_i18n::msg('snippets_tstr_settings_syntax_default_help') . '</small>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="tstr_sprog_syntax" value="1" ' . ($tstrSprogSyntax ? 'checked' : '') . '>
+                ' . rex_i18n::msg('snippets_tstr_settings_sprog_syntax') . '
+            </label>
+            <p class="help-block">' . rex_i18n::msg('snippets_tstr_settings_sprog_syntax_help') . '</p>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>' . rex_i18n::msg('snippets_tstr_settings_source_title') . '</legend>
+        
+        <div class="form-group">
+            <label for="tstr_source_clang_id">' . rex_i18n::msg('snippets_tstr_settings_source_label') . '</label>
+            <select class="form-control" id="tstr_source_clang_id" name="tstr_source_clang_id">';
+
+foreach (rex_clang::getAll() as $sourceClang) {
+    $selected = $sourceClang->getId() === $tstrSourceClangId ? ' selected' : '';
+    $content .= '<option value="' . $sourceClang->getId() . '"' . $selected . '>' . rex_escape($sourceClang->getName()) . ' (' . rex_escape($sourceClang->getCode()) . ')</option>';
+}
+
+$content .= '
+            </select>
+            <p class="help-block">' . rex_i18n::msg('snippets_tstr_settings_source_help') . '</p>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>' . $addon->i18n('snippets_tstr_settings_title') . '</legend>';
+
+// Aktuelle Sprachen und deren automatisches Mapping anzeigen
+$clangInfo = '';
+foreach (rex_clang::getAll() as $clang) {
+    $autoMapped = \FriendsOfREDAXO\Snippets\Service\SnippetsTranslate::getDeeplLanguageCode($clang->getCode());
+    $clangInfo .= '<code>' . rex_escape($clang->getCode()) . '</code> → <code>' . rex_escape($autoMapped) . '</code> (' . rex_escape($clang->getName()) . ')<br>';
+}
+
+$content .= '
+        <div class="alert alert-info">
+            <strong>Aktuelles Mapping:</strong><br>' . $clangInfo . '
+        </div>
+        <div class="form-group">
+            <label for="deepl_language_mapping">' . $addon->i18n('snippets_tstr_settings_mapping') . '</label>
+            <textarea class="form-control" id="deepl_language_mapping" name="deepl_language_mapping" rows="5" placeholder="en_gb=EN-GB&#10;pt_br=PT-BR">' . rex_escape($deeplLanguageMapping) . '</textarea>
+            <p class="help-block">' . $addon->i18n('snippets_tstr_settings_mapping_help') . '</p>
+        </div>
+    </fieldset>';
+
+$content .= '
         <legend>Debug</legend>
         
         <div class="form-group">
@@ -146,3 +270,32 @@ $fragment = new rex_fragment();
 $fragment->setVar('title', 'Statistiken', false);
 $fragment->setVar('body', $statsContent, false);
 echo $fragment->parse('core/page/section.php');
+
+// Sprog-Import (nur wenn Sprog verfügbar)
+if (rex_addon::get('sprog')->isAvailable()) {
+    $sprogSql = rex_sql::factory();
+    $sprogSql->setQuery('SELECT COUNT(DISTINCT wildcard) as cnt FROM ' . rex::getTable('sprog_wildcard'));
+    $sprogCount = (int) $sprogSql->getValue('cnt');
+
+    $importContent = '
+    <p>' . rex_i18n::msg('snippets_tstr_import_sprog_text', (string) $sprogCount) . '</p>
+    <form method="post" action="' . rex_url::currentBackendPage() . '">
+        <input type="hidden" name="func" value="import_sprog">
+        ' . $csrfToken->getHiddenField() . '
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="import_overwrite" value="1">
+                ' . rex_i18n::msg('snippets_tstr_import_sprog_overwrite') . '
+            </label>
+            <p class="help-block">' . rex_i18n::msg('snippets_tstr_import_sprog_overwrite_help') . '</p>
+        </div>
+        <button type="submit" class="btn btn-primary" ' . (0 === $sprogCount ? 'disabled' : '') . '>
+            <i class="rex-icon fa-download"></i> ' . rex_i18n::msg('snippets_tstr_import_sprog_btn', (string) $sprogCount) . '
+        </button>
+    </form>';
+
+    $importFragment = new rex_fragment();
+    $importFragment->setVar('title', rex_i18n::msg('snippets_tstr_import_sprog_title'), false);
+    $importFragment->setVar('body', $importContent, false);
+    echo $importFragment->parse('core/page/section.php');
+}
