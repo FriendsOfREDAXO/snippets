@@ -81,6 +81,7 @@ if (rex::isBackend()) {
     // HTML-Ersetzungen immer als letzter Filter ausführen
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
         $currentPage = (string) rex_be_controller::getCurrentPage();
+        // Keine HTML-Ersetzungen auf den Snippets-Seiten selbst, um sich nicht auszusperren
         if ('' !== $currentPage && str_starts_with($currentPage, 'snippets/')) {
             return $ep->getSubject();
         }
@@ -88,7 +89,7 @@ if (rex::isBackend()) {
         return HtmlReplacementService::process(
             $ep->getSubject(),
             'backend',
-            ContextDetector::isEditContext()
+            false // HTML-Ersetzungen immer zulassen, auch im Edit-Kontext (im Gegensatz zu normalen Snippets)
         );
     }, rex_extension::LATE);
 }

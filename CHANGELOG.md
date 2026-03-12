@@ -1,5 +1,14 @@
 # Changelog
 
+
+## [1.4.1] - 2026-03-12
+
+### Fixed
+
+- **HTML Ersetzungen im Edit-Modus:** HTML-Ersetzungen funktionierten bisher nicht auf Backend-Seiten vom Typ "Edit" (`page=content/edit`, YForm Table Manager). Diese künstliche Sperre wurde entfernt, um das Modifizieren von Edit-Seiten zu ermöglichen.
+- **Formular-Schutz:** Der DOM-Schutzbereich (der verhindern soll, dass HTML-Ersetzungen Formularfelder zerschießen) wurde für CSS-Selektoren granularer gestaltet (nur `input`, `textarea`, `select`, `option` sind gesperrt, nicht mehr das gesamte `<form>`).
+- **Darstellungsfehler behoben:** Die Backend-Seiten-Selectbox (Multiselect) in den HTML-Ersetzungen hatte einen Darstellungsfehler ("Höhe von einem Textinput") wegen eines CSS-Konflikts mit `selectpicker` und wurde korrigiert.
+
 ## [1.4.0] – 2026-03-10
 
 ### Hinzugefügt

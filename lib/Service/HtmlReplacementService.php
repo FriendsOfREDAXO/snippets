@@ -410,20 +410,12 @@ class HtmlReplacementService
     {
         $tag = strtolower($node->tagName);
 
-        if (in_array($tag, ['form', 'input', 'textarea', 'select', 'option', 'button'], true)) {
+        if (in_array($tag, ['input', 'textarea', 'select', 'option'], true)) {
             return true;
         }
 
-        if ($node->hasAttribute('name') || $node->hasAttribute('value')) {
+        if ($node->hasAttribute('name')) {
             return true;
-        }
-
-        $ancestor = $node->parentNode;
-        while ($ancestor instanceof Element) {
-            if ('form' === strtolower($ancestor->tagName)) {
-                return true;
-            }
-            $ancestor = $ancestor->parentNode;
         }
 
         return false;
