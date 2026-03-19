@@ -74,23 +74,16 @@ class SnippetService
     }
 
     /**
-     * Rendert ein PHP-Snippet (nur für Admins!)
+     * Rendert ein PHP-Snippet
      *
      * Sicherheit: Code wird in einer Closure mit begrenztem Scope ausgeführt.
      * Nur $SNIPPET_PARAMS und $SNIPPET_KEY sind verfügbar, keine internen Objekte.
+     * Die Rechteprüfung erfolgt beim Bearbeiten (nur Admins), nicht beim Ausführen.
      *
      * @param array<string, mixed> $params
      */
     private static function renderPhp(Snippet $snippet, string $code, array $params): string
     {
-        if (!PermissionService::canEditPhp()) {
-            \rex_logger::factory()->log(
-                'warning',
-                'Attempt to execute PHP snippet without permission: ' . $snippet->getKey()
-            );
-            return '';
-        }
-
         // Audit-Log
         self::logExecution($snippet);
 
