@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.5.0] – unveröffentlicht
+
+### Hinzugefügt
+
+- **CKEditor-5-Plugin `snippetsAddon`** (für cke5 ab 7.7, Aktivierung pro Profil über `{"externalPlugins": ["snippetsAddon"]}` in der Extra-Definition)
+  - Toolbar-Dropdown „Snippets & Übersetzungen“ mit Live-Suche, Reitern, Kategorie-Gruppen, Vorschau, vollständiger Tastaturbedienung und ARIA-Auszeichnung
+  - Einfügen als reiner Text `[[snippet:key]]` bzw. `[[ key ]]` – gespeichertes HTML bleibt unverändert
+  - Parameter-Formular für Snippets mit `{param}`- bzw. `$SNIPPET_PARAMS`-Platzhaltern
+  - Autovervollständigung beim Tippen von `[[`
+  - Hervorhebung vorhandener Platzhalter im Editor (unbekannte/deaktivierte Keys werden markiert) – nur in der Editor-Ansicht
+  - Eintrag im QuickEdit-Menü (`/`) des cke5-AddOns
+  - Konfiguration pro Profil (`types`, `categories`, `toolbar`, `toolbarAfter`, `autocomplete`, `highlight`)
+- Neuer Backend-API-Endpunkt `snippets_editor_items` (nur lesend) mit Snippets, Übersetzungen, Kategorien und Vorschau in der Artikelsprache; PHP-Snippets nur für Admins
+
+### Behoben
+
+- TinyMCE-Plugin `snippets_rex`: Der API-Endpunkt `snippets_tinymce_get` fragte die nicht existierende Spalte `category` ab (SQL-Fehler). Die Kategorie wird jetzt über `category_id` ermittelt; der Filter `categories` funktioniert mit Kategorienamen. Der Endpunkt liefert Daten nur noch an angemeldete Backend-User mit Snippets-Rechten.
+
 
 ## [1.4.1] - 2026-03-12
 
