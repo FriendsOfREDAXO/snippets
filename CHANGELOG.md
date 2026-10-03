@@ -1,10 +1,10 @@
 # Changelog
 
-## [1.5.0] – unveröffentlicht
+## [1.5.0] - 2026-10-03
 
 ### Hinzugefügt
 
-- **CKEditor-5-Plugin `snippetsAddon`** (für cke5 ab 7.7, Aktivierung pro Profil über `{"externalPlugins": ["snippetsAddon"]}` in der Extra-Definition)
+- **CKEditor-5-Plugin `snippetsAddon`** (#7, für cke5 ab 7.7, Aktivierung pro Profil über `{"externalPlugins": ["snippetsAddon"]}` in der Extra-Definition)
   - Toolbar-Dropdown „Snippets & Übersetzungen“ mit Live-Suche, Reitern, Kategorie-Gruppen, Vorschau, vollständiger Tastaturbedienung und ARIA-Auszeichnung
   - Einfügen als reiner Text `[[snippet:key]]` bzw. `[[ key ]]` – gespeichertes HTML bleibt unverändert
   - Parameter-Formular für Snippets mit `{param}`- bzw. `$SNIPPET_PARAMS`-Platzhaltern
@@ -12,10 +12,9 @@
   - Hervorhebung vorhandener Platzhalter im Editor (unbekannte/deaktivierte Keys werden markiert) – nur in der Editor-Ansicht
   - Eintrag im QuickEdit-Menü (`/`) des cke5-AddOns
   - Konfiguration pro Profil (`types`, `categories`, `toolbar`, `toolbarAfter`, `autocomplete`, `highlight`)
-- Neuer Backend-API-Endpunkt `snippets_editor_items` (nur lesend) mit Snippets, Übersetzungen, Kategorien und Vorschau in der Artikelsprache; PHP-Snippets nur für Admins
-
-- **Übersicht für Redakteure:** Einleitungstext, Spalten Titel → Platzhalter → Kategorie → Art (Klartext: „Text“, „HTML (formatiert)“, „PHP-Code“ inkl. Kontext) → **Verwendet in** (Fundstellen in Artikeln, Templates und Modulen mit Links), Filter nach Art, „Filter zurücksetzen“, Titel verlinkt auf Bearbeiten
-- **Bearbeiten:** Hilfetexte zu allen Feldern, Platzhalter-Vorschau beim Anlegen, Panel „Platzhalter & Verwendung“ mit erkannten Parametern, kopierbarem Beispiel und Liste „Wo wird das verwendet?“ (inkl. Hinweis bei inaktiven Snippets)
+- Neuer Backend-API-Endpunkt `snippets_editor_items` (nur lesend) mit Snippets, Übersetzungen, Kategorien und Vorschau in der Artikelsprache; PHP-Snippets nur für Admins (#7)
+- **Übersicht für Redakteure:** Einleitungstext, Spalten Titel → Platzhalter → Kategorie → Art (Klartext: „Text“, „HTML (formatiert)“, „PHP-Code“ inkl. Kontext) → **Verwendet in** (Fundstellen in Artikeln, Templates und Modulen mit Links), Filter nach Art, „Filter zurücksetzen“, Titel verlinkt auf Bearbeiten (#8)
+- **Bearbeiten:** Hilfetexte zu allen Feldern, Platzhalter-Vorschau beim Anlegen, Panel „Platzhalter & Verwendung“ mit erkannten Parametern, kopierbarem Beispiel und Liste „Wo wird das verwendet?“ (inkl. Hinweis bei inaktiven Snippets) (#8)
 - Neuer `UsageService` (Scan von Slices, Templates und Modul-Ausgaben nach Snippet-Platzhaltern)
 
 ### Geändert
