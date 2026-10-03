@@ -2,14 +2,13 @@
 
 namespace FriendsOfREDAXO\Snippets\Api;
 
+use FriendsOfREDAXO\Snippets\Service\EditorItemsService;
 use rex_api_function;
 use rex_response;
-use FriendsOfREDAXO\Snippets\Repository\TranslationStringRepository;
-use FriendsOfREDAXO\Snippets\Service\SnippetsTranslate;
 
 /**
  * API-Endpoint für TinyMCE Snippets-Plugin.
- * 
+ *
  * @package redaxo\snippets
  */
 class TinyMceSnippetsApi extends rex_api_function
@@ -18,32 +17,52 @@ class TinyMceSnippetsApi extends rex_api_function
 
     public function execute()
     {
-        $categories = rex_request('categories', 'string', '');
-        $categoriesArr = array_filter(array_map('trim', explode(',', $categories)));
-
-        // Alle verfügbaren Translation-Keys holen
-        // Wir nutzen den Repository-Ansatz, um alle Keys zu bekommen
-        $sql = \rex_sql::factory();
-        $query = 'SELECT key_name, category FROM ' . \rex::getTable('snippets_string') . ' WHERE status = 1';
-        
-        if (!empty($categoriesArr)) {
-            $query .= ' AND category IN (' . $sql->in($categoriesArr) . ')';
+        // Nur für angemeldete Backend-User mit Snippets-Rechten (auch bei Aufruf über das Frontend)
+        $user = \rex::getUser() ?? (new \rex_backend_login())->getUser();
+        if (null === $user) {
+            rex_response::cleanOutputBuffers();
+            rex_response::setStatus(rex_response::HTTP_FORBIDDEN);
+            rex_response::sendJson(['error' => 'Access denied']);
+            exit;
         }
-        
+        if (null === \rex::getUser()) {
+            \rex::setProperty('user', $user);
+        }
+        if (!EditorItemsService::canUse()) {
+            rex_response::cleanOutputBuffers();
+            rex_response::setStatus(rex_response::HTTP_FORBIDDEN);
+            rex_response::sendJson(['error' => 'Permission denied']);
+            exit;
+        }
+
+        $categories = rex_request('categories', 'string', '');
+        $categoriesArr = array_values(array_filter(array_map('trim', explode(',', $categories))));
+
+        // Kategorie steht als category_id in rex_snippets_string, der Name in rex_snippets_category
+        $sql = \rex_sql::factory();
+        $query = 'SELECT s.key_name, c.name AS category FROM ' . \rex::getTable('snippets_string') . ' s'
+            . ' LEFT JOIN ' . \rex::getTable('snippets_category') . ' c ON c.id = s.category_id'
+            . ' WHERE s.status = 1';
+
+        if ([] !== $categoriesArr) {
+            $query .= ' AND c.name IN (' . $sql->in($categoriesArr) . ')';
+        }
+
         $sql->setQuery($query);
         $rows = $sql->getArray();
-        
+
         $data = [];
         foreach ($rows as $row) {
             $key = (string) $row['key_name'];
+            $category = (string) ($row['category'] ?? '');
             $data[] = [
-                'title' => $key . ' (' . (string) $row['category'] . ')',
+                'title' => '' !== $category ? $key . ' (' . $category . ')' : $key,
                 'content' => '[[' . $key . ']]',
             ];
         }
 
         // Sortieren
-        usort($data, function($a, $b) {
+        usort($data, static function (array $a, array $b): int {
             return strcasecmp($a['title'], $b['title']);
         });
 

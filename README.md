@@ -15,6 +15,11 @@ Das **Snippets-AddOn** bietet zentrale Verwaltung von wiederverwendbaren Code-Fr
 - **Scope-Kontrolle** – Templates, Kategorien, URLs, Backend-Seiten
 - **Berechtigungssystem** – Admin, Editor, Viewer Rollen
 
+### Neu in Version 1.5.0
+
+- **CKEditor-5-Plugin:** Snippets und String-Übersetzungen per Toolbar-Dropdown (Suche, Kategorien, Tastaturbedienung) einfügen, Autovervollständigung bei `[[` und farbige Hervorhebung der Platzhalter im Editor – siehe [CKEditor-5-Integration](#ckeditor-5-integration)
+- **Parameter-Formular** für Snippets mit `{param}`-Platzhaltern
+
 ### Neu in Version 1.4.0
 
 - **String-Übersetzungen:** Neues mehrsprachiges Übersetzungssystem – eine schlanke Sprog-Alternative für String-Übersetzungen, direkt im Snippets-AddOn
@@ -829,6 +834,7 @@ if (SnippetsInstaller::snippetExists('my_addon.footer')) {
 | `snippets[admin]` | Vollzugriff, PHP-Snippets bearbeiten, Einstellungen |
 | `snippets[editor]` | HTML/Text-Snippets erstellen und bearbeiten |
 | `snippets[viewer]` | Nur lesen |
+| `snippets[translate]` | String-Übersetzungen bearbeiten |
 
 ---
 
@@ -877,6 +883,79 @@ Dieses Plugin erlaubt die Auswahl von mehrsprachigen **String-Übersetzungen** (
 *   Eingefügt wird der Platzhalter `[[ key ]]`.
 
 > **Praxis-Tipp:** Nutzen Sie die Kategorien, um Redakteuren in Inhalts-Blöcken nur relevante Keys (z.B. Kategorie `Content`) anzubieten, während Admin-Bereiche die volle Auswahl haben.
+
+### CKEditor-5-Integration
+
+Ab Version 1.5.0 bringt das AddOn ein Plugin für das [cke5-AddOn](https://github.com/FriendsOfREDAXO/cke5) (ab Version 7.7) mit. Redakteure können damit Snippets und String-Übersetzungen direkt im Editor suchen und einfügen, ohne sich Keys merken zu müssen.
+
+**Funktionen:**
+
+- Toolbar-Button **„Snippets & Übersetzungen“** mit Dropdown:
+  - Suchfeld mit Live-Filter (Titel, Key, Beschreibung, Vorschau, Kategorie; Groß-/Kleinschreibung und Umlaute egal)
+  - Reiter **Alle / Snippets / Übersetzungen** mit Trefferzahl
+  - Gruppierung nach Kategorie, je Eintrag Titel, Platzhalter und Beschreibung bzw. Wert in der aktuellen Sprache
+  - Komplett per Tastatur bedienbar: Das Suchfeld ist beim Öffnen fokussiert, `↑`/`↓` wählen, `Enter` fügt ein, `Esc` leert die Suche bzw. schließt; nach dem Einfügen steht der Cursor wieder im Editor
+  - ARIA: Combobox + Listbox mit `aria-activedescendant`, Reiter mit `role="tab"`, Live-Region für die Trefferzahl
+- Eingefügt wird **reiner Text** an der Cursorposition: `[[snippet:key]]` bzw. `[[ key ]]` – das gespeicherte HTML bleibt also exakt so, wie es der OUTPUT_FILTER erwartet.
+- **Parameter-Formular:** Enthält ein Snippet Platzhalter wie `{name}` (HTML/Text) bzw. `$SNIPPET_PARAMS['name']` (PHP; ein Standardwert aus `?? 'Wert'` wird als Platzhaltertext angezeigt), fragt das Plugin die Werte vor dem Einfügen ab und erzeugt `[[snippet:key|name=Wert]]`. Leere Felder werden weggelassen; die Zeichen `|`, `[` und `]` werden aus Werten entfernt, weil sie die Syntax aufbrechen würden.
+- **Autovervollständigung:** Wer `[[` tippt, bekommt passende Snippets und Übersetzungen vorgeschlagen (nutzt das Mention-Plugin von CKEditor; eingefügt wird ebenfalls reiner Text, kein `<span class="mention">`).
+- **Hervorhebung im Editor:** Vorhandene Platzhalter werden farbig markiert (Snippets blau, Übersetzungen grün). Unbekannte Keys (z. B. Tippfehler) werden rot unterstrichen, deaktivierte durchgestrichen; ein Tooltip zeigt Titel bzw. Wert. Die Markierung existiert nur in der Editor-Ansicht (CKEditor-Marker) und landet **nicht** im gespeicherten HTML.
+- **QuickEdit:** Im `/`-Befehlsmenü des cke5-AddOns erscheint der Eintrag „Snippet oder Übersetzung einfügen“.
+
+**Einrichtung:**
+
+1. Im cke5-AddOn das gewünschte Profil bearbeiten.
+2. Die Option **Extra-Definition** aktivieren und dort eintragen:
+   ```json
+   {
+     "externalPlugins": ["snippetsAddon"]
+   }
+   ```
+3. Profil speichern. Der Toolbar-Button wird automatisch am Ende der Toolbar ergänzt – ein eigener Toolbar-Eintrag ist nicht nötig (und im Toolbar-Feld des Profils auch nicht auswählbar).
+
+**Konfiguration (optional)** – ebenfalls in der Extra-Definition, unter dem Schlüssel `snippetsAddon`:
+
+```json
+{
+  "externalPlugins": ["snippetsAddon"],
+  "snippetsAddon": {
+    "types": ["snippets", "translations"],
+    "categories": ["Website"],
+    "toolbar": true,
+    "toolbarAfter": "link",
+    "autocomplete": true,
+    "highlight": true
+  }
+}
+```
+
+| Option | Standard | Bedeutung |
+|--------|----------|-----------|
+| `types` | `["snippets", "translations"]` | Nur Snippets (`["snippets"]`) oder nur Übersetzungen (`["translations"]`) anbieten |
+| `categories` | `[]` (alle) | Nur Einträge dieser Kategorien (Name oder ID, auch als kommagetrennter String) – analog zur TinyMCE-Option `categories` |
+| `toolbar` | `true` | Toolbar-Button automatisch ergänzen (`false`, wenn nur Autovervollständigung/Hervorhebung gewünscht ist) |
+| `toolbarAfter` | – | Button nach diesem Toolbar-Eintrag einfügen (z. B. `"link"`); sonst am Ende |
+| `autocomplete` | `true` | Vorschläge beim Tippen von `[[` |
+| `highlight` | `true` | Platzhalter im Editor hervorheben |
+
+Die Standardwerte für alle Profile lassen sich auch in PHP setzen, z. B. in der `boot.php` des project-AddOns (wird nach `snippets` geladen):
+
+```php
+if (rex::isBackend() && class_exists(\Cke5\PluginRegistry::class) && isset(\Cke5\PluginRegistry::all()['snippetsAddon'])) {
+    $config = \FriendsOfREDAXO\Snippets\Service\Cke5Integration::getClientConfig();
+    $config['defaults']['categories'] = ['Website'];
+    \Cke5\PluginRegistry::addPlugin('snippetsAddon', rex_url::addonAssets('snippets', 'js/cke5-snippets.js'), $config);
+    rex_view::setJsProperty('cke5ExternalPlugins', \Cke5\PluginRegistry::clientConfig());
+}
+```
+
+**Rechte und Daten:** Die Liste kommt vom Backend-API-Endpunkt `index.php?rex-api-call=snippets_editor_items` (nur Backend, nur lesend). Das Plugin wird nur für Benutzer registriert, die eines der Rechte `snippets[admin]`, `snippets[editor]`, `snippets[viewer]` oder `snippets[translate]` haben (Admins immer).
+
+- Snippets: nur aktive Snippets, keine reinen Backend-Snippets (Kontext „Backend“ – die würden im Artikel nie ausgegeben); **PHP-Snippets nur für Admins** (`snippets[admin]`). Mehrsprachige Snippets zeigen die Vorschau in der Artikelsprache.
+- Übersetzungen (benötigen `snippets[admin|editor|viewer|translate]`): nur aktive Keys, Vorschau des Werts in der Sprache des bearbeiteten Artikels (`clang` aus der URL), bei aktivierter Sprach-Vererbung mit Fallback; fehlende Werte werden markiert.
+- Die Links „Verwalten“ erscheinen nur mit den passenden Rechten.
+
+> **Hinweis zur Ladereihenfolge:** Das cke5-AddOn gibt seine Assets bereits in seiner eigenen `boot.php` aus und wird alphabetisch vor `snippets` geladen. Das Snippets-AddOn reicht Skript und Registry-Konfiguration deshalb selbst nach, wenn cke5 schon geladen ist – es ist keine zusätzliche Einrichtung nötig.
 
 ### Sprog-Integration
 

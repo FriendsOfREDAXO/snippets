@@ -1,0 +1,393 @@
+/**
+ * Snippets AddOn – CKEditor-5-Plugin "snippetsAddon"
+ *
+ * Nutzt die CSS-Variablen von CKEditor 5, damit Light- und Dark-Theme
+ * (cke5-AddOn) automatisch passen.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Dropdown-Panel                                                      */
+/* ------------------------------------------------------------------ */
+
+.ck.ck-snippets-addon {
+    display: flex;
+    flex-direction: column;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    font-size: var(--ck-font-size-base, 13px);
+    color: var(--ck-color-text, #333);
+    outline: none;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__head {
+    padding: var(--ck-spacing-standard, 10px);
+    border-bottom: 1px solid var(--ck-color-base-border, #ccced1);
+}
+
+.ck.ck-snippets-addon .ck.ck-input.ck-snippets-addon__search {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: var(--ck-spacing-small, 6px);
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tab {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 4px 8px;
+    border: 1px solid var(--ck-color-base-border, #ccced1);
+    border-radius: var(--ck-border-radius, 2px);
+    background: var(--ck-color-base-background, #fff);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tab:hover {
+    background: var(--ck-color-button-default-hover-background, #f0f0f0);
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tab[aria-selected="true"] {
+    border-color: var(--ck-color-focus-border, #2977ff);
+    background: var(--ck-color-button-on-background, #f0f7ff);
+    color: var(--ck-color-button-on-color, #2977ff);
+    font-weight: 600;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tab:focus-visible,
+.ck.ck-snippets-addon .ck-snippets-addon__button:focus-visible,
+.ck.ck-snippets-addon .ck-snippets-addon__manage:focus-visible {
+    outline: 2px solid var(--ck-color-focus-border, #2977ff);
+    outline-offset: 1px;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tab-count {
+    min-width: 1.6em;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: var(--ck-color-base-foreground, #fafafa);
+    font-size: 0.85em;
+    font-weight: normal;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__list {
+    max-height: min(360px, 55vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 0;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__tabs[hidden],
+.ck.ck-snippets-addon .ck-snippets-addon__list[hidden],
+.ck.ck-snippets-addon .ck-snippets-addon__params[hidden],
+.ck.ck-snippets-addon .ck-snippets-addon__manage[hidden] {
+    display: none !important;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__group-label {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 6px var(--ck-spacing-standard, 10px) 4px;
+    background: var(--ck-color-base-foreground, #fafafa);
+    color: var(--ck-color-text, #333);
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px var(--ck-spacing-standard, 10px);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__option_active {
+    border-left-color: var(--ck-color-focus-border, #2977ff);
+    background: var(--ck-color-list-button-hover-background, #f0f0f0);
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__option-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__option-title {
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__option-key,
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__key {
+    overflow: hidden;
+    font-family: var(--ck-font-family-monospace, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.85em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.8;
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__option-info {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.9em;
+    opacity: 0.8;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__badge,
+.ck .ck-snippets-addon-mention .ck-snippets-addon__badge {
+    flex: 0 0 auto;
+    padding: 0 6px;
+    border-radius: 3px;
+    background: var(--ck-color-base-foreground, #f0f0f0);
+    border: 1px solid var(--ck-color-base-border, #ccced1);
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1.6;
+    text-transform: uppercase;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__badge_php {
+    border-color: #b35c00;
+    color: #8a4600;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__badge_missing {
+    border-color: #b00020;
+    color: #b00020;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__message {
+    padding: 12px var(--ck-spacing-standard, 10px);
+    opacity: 0.85;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__message_error {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--ck-color-base-error, #db3700);
+    opacity: 1;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__params {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: var(--ck-spacing-standard, 10px);
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__params-title {
+    font-weight: 600;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__params-help {
+    margin: 0;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__field .ck-input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__label {
+    font-family: var(--ck-font-family-monospace, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__params-preview {
+    display: block;
+    padding: 6px 8px;
+    border-radius: var(--ck-border-radius, 2px);
+    background: var(--ck-color-base-foreground, #fafafa);
+    color: inherit;
+    font-size: 0.85em;
+    word-break: break-all;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__params-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.ck.ck-snippets-addon .ck.ck-button.ck-snippets-addon__button {
+    padding: 4px 12px;
+    border: 1px solid var(--ck-color-base-border, #ccced1);
+    cursor: pointer;
+}
+
+.ck.ck-snippets-addon .ck.ck-button.ck-snippets-addon__button_primary {
+    border-color: #1d5fbf;
+    background: #1d5fbf; /* Kontrast ≥ 4.5:1 zu Weiß */
+    color: #fff;
+}
+
+.ck.ck-snippets-addon .ck.ck-button.ck-snippets-addon__button_primary:hover {
+    border-color: #164a95;
+    background: #164a95;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px var(--ck-spacing-standard, 10px);
+    border-top: 1px solid var(--ck-color-base-border, #ccced1);
+    font-size: 0.85em;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__hint {
+    opacity: 0.75;
+}
+
+.ck.ck-snippets-addon .ck-snippets-addon__manage {
+    color: var(--ck-color-link-default, #198cf0);
+    white-space: nowrap;
+}
+
+/* CKEditor setzt im Toolbar-Bereich white-space: nowrap – Fließtexte im Panel dürfen umbrechen */
+.ck.ck-snippets-addon .ck-snippets-addon__option-info,
+.ck.ck-snippets-addon .ck-snippets-addon__message,
+.ck.ck-snippets-addon .ck-snippets-addon__message *,
+.ck.ck-snippets-addon .ck-snippets-addon__group-label,
+.ck.ck-snippets-addon .ck-snippets-addon__params-title,
+.ck.ck-snippets-addon .ck-snippets-addon__params-help,
+.ck.ck-snippets-addon .ck-snippets-addon__hint {
+    white-space: normal;
+}
+
+/* ------------------------------------------------------------------ */
+/* Autovervollständigung ("[[")                                        */
+/* ------------------------------------------------------------------ */
+
+.ck .ck.ck-snippets-addon-mention {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 2px 0;
+    text-align: left;
+}
+
+/* Kinder übernehmen die Button-Farbe (auch im aktiven, blau hinterlegten Zustand) */
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__top,
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__top *,
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__key {
+    color: inherit;
+}
+
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__top,
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__key {
+    width: 100%;
+    min-width: 0;
+    max-width: min(380px, calc(100vw - 60px));
+}
+
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ck .ck-snippets-addon-mention .ck-snippets-addon-mention__title {
+    max-width: min(300px, calc(100vw - 120px));
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hervorhebung im Editor (nur Editing-View, nicht im gespeicherten HTML) */
+/* ------------------------------------------------------------------ */
+
+.ck-content .ck-snippets-ph {
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(41, 119, 255, 0.45);
+    background: rgba(41, 119, 255, 0.12);
+}
+
+.ck-content .ck-snippets-ph_translation {
+    box-shadow: 0 0 0 1px rgba(0, 140, 90, 0.5);
+    background: rgba(0, 160, 100, 0.12);
+}
+
+.ck-content .ck-snippets-ph_inactive {
+    box-shadow: 0 0 0 1px rgba(128, 128, 128, 0.6);
+    background: rgba(128, 128, 128, 0.15);
+    text-decoration: line-through;
+}
+
+.ck-content .ck-snippets-ph_unknown {
+    box-shadow: 0 0 0 1px rgba(219, 55, 0, 0.7);
+    background: rgba(219, 55, 0, 0.12);
+    text-decoration: underline wavy rgba(219, 55, 0, 0.8);
+}
+
+@media (forced-colors: active) {
+    .ck-content .ck-snippets-ph {
+        outline: 1px solid CanvasText;
+    }
+
+    .ck.ck-snippets-addon .ck-snippets-addon__option_active {
+        outline: 2px solid Highlight;
+    }
+}
+
+/* Badges in der Autovervollständigung: lesbar auch im aktiven (farbigen) Zustand */
+.ck .ck-snippets-addon-mention .ck-snippets-addon__badge,
+.ck .ck-snippets-addon-mention .ck-snippets-addon__badge_php {
+    border-color: currentColor;
+    background: transparent;
+    color: inherit;
+}
