@@ -478,3 +478,72 @@ body.rex-theme-dark .snippets-tstr-category-trigger[data-has-category="1"]:hover
         color: #7ab8e8;
     }
 }
+
+/* Redakteurs-Hilfen (Übersicht / Bearbeiten) */
+.snippets-intro {
+    max-width: 75em;
+    margin-bottom: 15px;
+}
+
+.snippets-filter-spacer {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.snippets-table .snippets-col-placeholder {
+    white-space: nowrap;
+}
+
+.snippets-table .snippets-col-usage summary {
+    cursor: pointer;
+}
+
+.snippets-usage-list {
+    margin: 4px 0 0;
+}
+
+.snippets-usage-list li {
+    margin-bottom: 2px;
+}
+
+.snippets-help-list {
+    margin: 4px 0 0;
+    padding-left: 18px;
+}
+
+.snippets-panel-heading {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+.snippets-subheading {
+    margin: 0 0 8px;
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.snippets-subheading:not(:first-child) {
+    margin-top: 20px;
+}
+
+.snippets-usage-list a {
+    text-decoration: underline;
+}
+
+/* Zusatzinfos in Übersicht/Bearbeiten mit ausreichendem Kontrast (WCAG AA) */
+.snippets-meta.text-muted {
+    color: #5d6875;
+}
+
+body.rex-theme-dark .snippets-meta.text-muted {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.rex-has-theme:not(.rex-theme-light) .snippets-meta.text-muted {
+        color: rgba(255, 255, 255, 0.7);
+    }
+}

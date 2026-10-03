@@ -106,7 +106,7 @@ snippets_status_updated = Status wurde aktualisiert
 snippets_btn_save_and_close = Speichern und schließen
 snippets_btn_cancel = Abbrechen
 snippets_btn_delete = Löschen
-snippets_btn_copy_shortcode = Shortcode kopieren
+snippets_btn_copy_shortcode = Platzhalter kopieren
 
 # Messages
 snippets_saved = Snippet wurde gespeichert
@@ -114,7 +114,7 @@ snippets_deleted = Snippet wurde gelöscht
 snippets_error_key_exists = Ein Snippet mit diesem Schlüssel existiert bereits
 snippets_error_invalid_key = Ungültiger Schlüssel (nur a-z, 0-9, -, _ erlaubt)
 snippets_error_php_permission = Keine Berechtigung für PHP-Snippets
-snippets_copied_to_clipboard = Shortcode wurde in die Zwischenablage kopiert
+snippets_copied_to_clipboard = Platzhalter wurde in die Zwischenablage kopiert
 
 # Berechtigungen
 perm_general_snippets[] = Snippets: Zugriff auf AddOn
@@ -480,3 +480,44 @@ snippets_cke5_unknown_placeholder = Unbekannter Platzhalter – wird auf der Web
 snippets_cke5_inactive_placeholder = Platzhalter ist deaktiviert – wird auf der Website nicht ausgegeben
 snippets_cke5_quickedit_label = Snippet oder Übersetzung einfügen
 snippets_cke5_error_permission = Keine Berechtigung für Snippets.
+
+# Redakteurs-Hilfen Übersicht / Bearbeiten
+snippets_list_intro = Snippets sind wiederverwendbare Bausteine, z. B. Öffnungszeiten oder ein Buchungsformular. Kopieren Sie den Platzhalter und fügen Sie ihn in einen Text ein – auf der Website erscheint dann automatisch der Inhalt des Snippets. Ändern Sie das Snippet hier, ändert es sich überall.
+snippets_filter_legend = Snippets filtern
+snippets_filter_reset = Filter zurücksetzen
+snippets_all_types = Alle Arten
+snippets_col_placeholder = Platzhalter
+snippets_col_kind = Art
+snippets_col_usage = Verwendet in
+snippets_no_snippets_filter = Keine Snippets passen zu diesem Filter.
+snippets_type_label_text = Text
+snippets_type_label_html = HTML (formatiert)
+snippets_type_label_php = PHP-Code
+snippets_type_help_text = Reiner Text ohne Formatierung.
+snippets_type_help_html = Formatierter Inhalt oder Einbettungs-Code (z. B. Widgets, Formulare).
+snippets_type_help_php = Dynamischer Inhalt aus PHP-Code. Nur Administratoren können ihn bearbeiten.
+snippets_usage_none_short = nicht verwendet
+snippets_usage_count_one = 1 Fundstelle
+snippets_usage_count = {0} Fundstellen
+snippets_usage_type_article = Artikel
+snippets_usage_type_template = Template
+snippets_usage_type_module = Modul
+snippets_status_toggle_off = Aktiv – zum Deaktivieren klicken
+snippets_status_toggle_on = Inaktiv – zum Aktivieren klicken
+snippets_form_key_readonly = Der Schlüssel kann nachträglich nicht geändert werden, weil er in Texten verwendet wird.
+snippets_form_key_preview = So sieht der Platzhalter aus:
+snippets_form_title_help = Verständlicher Name, unter dem Redakteure das Snippet finden (z. B. „Öffnungszeiten Restaurant“).
+snippets_form_description_help = Wofür ist das Snippet gedacht? Die Beschreibung wird in der Übersicht und im Editor angezeigt.
+snippets_form_content_help = Platzhalter in geschweiften Klammern wie {name} werden beim Einfügen mit Werten befüllt (Parameter). Snippets und Übersetzungen dürfen ineinander verschachtelt werden.
+snippets_form_context_help = Wo soll der Inhalt erscheinen? Für Inhalte auf der Website „Frontend“ oder „Frontend & Backend“ wählen. „Backend“ gibt den Inhalt nur in der REDAXO-Verwaltung aus.
+snippets_form_status_active = Aktiv
+snippets_form_status_help = Nur aktive Snippets werden ausgegeben. Inaktive Platzhalter bleiben auf der Website leer.
+snippets_usage_panel_title = Platzhalter & Verwendung
+snippets_usage_placeholder_title = Platzhalter zum Einfügen
+snippets_usage_placeholder_help = Diesen Platzhalter in einen Text kopieren – im CKEditor geht das auch über den Button „Snippets & Übersetzungen“.
+snippets_usage_params_help = Dieses Snippet hat Parameter. Werte werden mit senkrechtem Strich angehängt:
+snippets_usage_param_default = Standard
+snippets_usage_where_title = Wo wird das verwendet?
+snippets_usage_none = Dieses Snippet wird derzeit in keinem Artikel, Template oder Modul verwendet.
+snippets_usage_inactive_warning = Das Snippet ist inaktiv – an diesen Stellen erscheint auf der Website derzeit nichts.
+snippets_usage_scan_notice = Durchsucht werden die Inhalte aller Artikel (alle Sprachen) sowie Templates und Modul-Ausgaben.
