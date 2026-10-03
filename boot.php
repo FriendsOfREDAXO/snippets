@@ -16,6 +16,7 @@ $addon = rex_addon::get('snippets');
 // API-Funktion registrieren (Namespace-Registrierung, ab REDAXO 5.17)
 rex_api_function::register('snippets_translations', FriendsOfREDAXO\Snippets\Api\TranslationsApi::class);
 rex_api_function::register('snippets_tinymce_get', FriendsOfREDAXO\Snippets\Api\TinyMceSnippetsApi::class);
+rex_api_function::register('snippets_editor_items', FriendsOfREDAXO\Snippets\Api\EditorItemsApi::class);
 
 // Berechtigungen registrieren
 if (rex::isBackend() && null !== rex::getUser()) {
@@ -128,4 +129,9 @@ if (rex::isBackend() && rex::getUser() && rex_addon::get('tinymce')->isAvailable
             'redaxo_snippets'
         );
     }
+}
+
+// CKEditor 5 Plugin Integration (Aktivierung pro Profil über "externalPlugins": ["snippetsAddon"])
+if (rex::isBackend() && null !== rex::getUser() && rex_addon::get('cke5')->isAvailable()) {
+    FriendsOfREDAXO\Snippets\Service\Cke5Integration::register();
 }
