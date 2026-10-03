@@ -105,7 +105,7 @@ snippets_status_updated = Status has been updated
 snippets_btn_save_and_close = Save and close
 snippets_btn_cancel = Cancel
 snippets_btn_delete = Delete
-snippets_btn_copy_shortcode = Copy shortcode
+snippets_btn_copy_shortcode = Copy placeholder
 
 # Messages
 snippets_saved = Snippet has been saved
@@ -113,7 +113,7 @@ snippets_deleted = Snippet has been deleted
 snippets_error_key_exists = A snippet with this key already exists
 snippets_error_invalid_key = Invalid key (only a-z, 0-9, -, _ allowed)
 snippets_error_php_permission = No permission for PHP snippets
-snippets_copied_to_clipboard = Shortcode copied to clipboard
+snippets_copied_to_clipboard = Placeholder copied to clipboard
 
 # Permissions
 perm_general_snippets[] = Snippets: Access to addon
@@ -486,3 +486,44 @@ snippets_cke5_unknown_placeholder = Unknown placeholder – will not be replaced
 snippets_cke5_inactive_placeholder = Placeholder is disabled – will not be output on the website
 snippets_cke5_quickedit_label = Insert snippet or translation
 snippets_cke5_error_permission = No permission for snippets.
+
+# Editor help overview / edit
+snippets_list_intro = Snippets are reusable building blocks, e.g. opening hours or a booking form. Copy the placeholder and paste it into a text – the website will then automatically show the snippet's content. Change the snippet here and it changes everywhere.
+snippets_filter_legend = Filter snippets
+snippets_filter_reset = Reset filter
+snippets_all_types = All kinds
+snippets_col_placeholder = Placeholder
+snippets_col_kind = Kind
+snippets_col_usage = Used in
+snippets_no_snippets_filter = No snippets match this filter.
+snippets_type_label_text = Text
+snippets_type_label_html = HTML (formatted)
+snippets_type_label_php = PHP code
+snippets_type_help_text = Plain text without formatting.
+snippets_type_help_html = Formatted content or embed code (e.g. widgets, forms).
+snippets_type_help_php = Dynamic content from PHP code. Only administrators can edit it.
+snippets_usage_none_short = not used
+snippets_usage_count_one = 1 occurrence
+snippets_usage_count = {0} occurrences
+snippets_usage_type_article = Article
+snippets_usage_type_template = Template
+snippets_usage_type_module = Module
+snippets_status_toggle_off = Active – click to deactivate
+snippets_status_toggle_on = Inactive – click to activate
+snippets_form_key_readonly = The key cannot be changed later because it is used in texts.
+snippets_form_key_preview = The placeholder will look like this:
+snippets_form_title_help = A clear name editors can find the snippet by (e.g. “Restaurant opening hours”).
+snippets_form_description_help = What is the snippet for? The description is shown in the overview and in the editor.
+snippets_form_content_help = Placeholders in curly braces like {name} are filled with values on insertion (parameters). Snippets and translations may be nested.
+snippets_form_context_help = Where should the content appear? Choose “Frontend” or “Frontend & Backend” for website content. “Backend” only outputs it in the REDAXO admin area.
+snippets_form_status_active = Active
+snippets_form_status_help = Only active snippets are output. Inactive placeholders stay empty on the website.
+snippets_usage_panel_title = Placeholder & usage
+snippets_usage_placeholder_title = Placeholder to insert
+snippets_usage_placeholder_help = Copy this placeholder into a text – in CKEditor you can also use the “Snippets & translations” button.
+snippets_usage_params_help = This snippet has parameters. Values are appended with a vertical bar:
+snippets_usage_param_default = default
+snippets_usage_where_title = Where is it used?
+snippets_usage_none = This snippet is currently not used in any article, template or module.
+snippets_usage_inactive_warning = The snippet is inactive – nothing is shown on the website at these places right now.
+snippets_usage_scan_notice = The contents of all articles (all languages), templates and module outputs are searched.

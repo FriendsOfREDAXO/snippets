@@ -152,16 +152,15 @@ if (null !== $snippet && rex_clang::count() > 1 && $id > 0) {
     // Tab-Navigation
     $currentTab = rex_request::get('tab', 'string', 'main');
     
-    $tabs = '<ul class="nav nav-tabs" role="tablist">';
-    $tabs .= '<li role="presentation"' . ('main' === $currentTab ? ' class="active"' : '') . '>';
-    $tabs .= '<a href="' . rex_url::currentBackendPage(['func' => 'edit', 'id' => $id, 'tab' => 'main']) . '">';
-    $tabs .= rex_i18n::msg('snippets_tab_main');
-    $tabs .= '</a></li>';
-    
-    $tabs .= '<li role="presentation"' . ('translations' === $currentTab ? ' class="active"' : '') . '>';
-    $tabs .= '<a href="' . rex_url::currentBackendPage(['func' => 'edit', 'id' => $id, 'tab' => 'translations']) . '">';
-    $tabs .= rex_i18n::msg('snippets_tab_translations');
-    $tabs .= '</a></li>';
+    // Reiter sind Links auf eigene Seiten – daher Navigation mit aria-current statt ARIA-Tabs
+    $tabs = '<ul class="nav nav-tabs">';
+    foreach (['main' => 'snippets_tab_main', 'translations' => 'snippets_tab_translations'] as $tabKey => $tabLabel) {
+        $isActiveTab = $tabKey === $currentTab;
+        $tabs .= '<li' . ($isActiveTab ? ' class="active"' : '') . '>';
+        $tabs .= '<a href="' . rex_url::currentBackendPage(['func' => 'edit', 'id' => $id, 'tab' => $tabKey]) . '"' . ($isActiveTab ? ' aria-current="page"' : '') . '>';
+        $tabs .= rex_i18n::msg($tabLabel);
+        $tabs .= '</a></li>';
+    }
     $tabs .= '</ul>';
     
     echo $tabs;

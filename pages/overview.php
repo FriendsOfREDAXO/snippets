@@ -8,6 +8,7 @@
 
 use FriendsOfREDAXO\Snippets\Repository\SnippetRepository;
 use FriendsOfREDAXO\Snippets\Service\PermissionService;
+use FriendsOfREDAXO\Snippets\Service\UsageService;
 
 // Berechtigungsprüfung
 if (!PermissionService::canView()) {
@@ -15,12 +16,15 @@ if (!PermissionService::canView()) {
     return;
 }
 
-// Status ändern
+// Status ändern (per Link, daher mit CSRF-Token abgesichert)
 $func = rex_request::get('func', 'string');
 $id = rex_request::get('id', 'int');
+$csrfToken = rex_csrf_token::factory('snippets_overview');
 if ('toggle_status' === $func && $id > 0 && PermissionService::canEdit()) {
     $snippet = SnippetRepository::getById($id);
-    if ($snippet) {
+    if (!$csrfToken->isValid()) {
+        echo rex_view::error(rex_i18n::msg('csrf_token_invalid'));
+    } elseif ($snippet && ('php' !== $snippet->getContentType() || PermissionService::canEditPhp())) {
         // Status toggeln
         $newStatus = $snippet->isActive() ? 0 : 1;
         SnippetRepository::save(['id' => $id, 'status' => $newStatus]);
@@ -33,7 +37,9 @@ $search = rex_request::get('search', 'string', '');
 $category = rex_request::get('category', 'int', 0);
 $context = rex_request::get('context', 'string', '');
 $contentType = rex_request::get('content_type', 'string', '');
-$category = rex_request::get('category', 'int', 0);
+if (!in_array($contentType, ['', 'text', 'html', 'php'], true)) {
+    $contentType = '';
+}
 
 // Kategorien laden für Filter und Anzeige
 $sql = rex_sql::factory();
@@ -68,5 +74,7 @@ $fragment->setVar('search', $search, false);
 $fragment->setVar('category', $category, false);
 $fragment->setVar('context', $context, false);
 $fragment->setVar('content_type', $contentType, false);
+$fragment->setVar('usages', [] !== $snippets ? UsageService::findSnippetUsages() : [], false);
+$fragment->setVar('toggle_params', $csrfToken->getUrlParams(), false);
 
 echo $fragment->parse('snippets/listing.php');

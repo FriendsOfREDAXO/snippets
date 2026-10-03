@@ -14,8 +14,18 @@
   - Konfiguration pro Profil (`types`, `categories`, `toolbar`, `toolbarAfter`, `autocomplete`, `highlight`)
 - Neuer Backend-API-Endpunkt `snippets_editor_items` (nur lesend) mit Snippets, Übersetzungen, Kategorien und Vorschau in der Artikelsprache; PHP-Snippets nur für Admins
 
+- **Übersicht für Redakteure:** Einleitungstext, Spalten Titel → Platzhalter → Kategorie → Art (Klartext: „Text“, „HTML (formatiert)“, „PHP-Code“ inkl. Kontext) → **Verwendet in** (Fundstellen in Artikeln, Templates und Modulen mit Links), Filter nach Art, „Filter zurücksetzen“, Titel verlinkt auf Bearbeiten
+- **Bearbeiten:** Hilfetexte zu allen Feldern, Platzhalter-Vorschau beim Anlegen, Panel „Platzhalter & Verwendung“ mit erkannten Parametern, kopierbarem Beispiel und Liste „Wo wird das verwendet?“ (inkl. Hinweis bei inaktiven Snippets)
+- Neuer `UsageService` (Scan von Slices, Templates und Modul-Ausgaben nach Snippet-Platzhaltern)
+
+### Geändert
+
+- Barrierefreiheit: Labels mit `for`/`aria-describedby`, Kopier-Buttons mit sprechendem `aria-label` und Bildschirmleser-Ansage, Reiter der Bearbeiten-Seite als Navigation mit `aria-current`, ausreichender Kontrast für Zusatzinfos
+- Status-Umschalter in der Übersicht ist per CSRF-Token abgesichert; PHP-Snippets können nur noch von Admins aktiviert/deaktiviert werden (wie beim Bearbeiten)
+
 ### Behoben
 
+- Kopier-Button in Übersicht und Bearbeiten war doppelt an das Klick-Event gebunden (Inline-Skript + `snippets.js`)
 - TinyMCE-Plugin `snippets_rex`: Der API-Endpunkt `snippets_tinymce_get` fragte die nicht existierende Spalte `category` ab (SQL-Fehler). Die Kategorie wird jetzt über `category_id` ermittelt; der Filter `categories` funktioniert mit Kategorienamen. Der Endpunkt liefert Daten nur noch an angemeldete Backend-User mit Snippets-Rechten.
 
 
