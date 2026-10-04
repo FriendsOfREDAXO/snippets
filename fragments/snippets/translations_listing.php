@@ -242,7 +242,7 @@ $clangCount = count($clangs);
                                     <?php endif; ?>
                                     <code class="snippets-tstr-placeholder" title="<?= rex_i18n::msg('snippets_tstr_click_to_edit_key') ?>"
                                           data-key="<?= rex_escape($string->getKey()) ?>"
-                                          data-string-id="<?= $string->getId() ?>">&#91;&#91; <?= rex_escape($string->getKey()) ?> &#93;&#93;</code>
+                                          data-string-id="<?= $string->getId() ?>">&#91;&#91;&nbsp;<?= str_replace(['.', '_'], ['.<wbr>', '_<wbr>'], rex_escape($string->getKey())) ?>&nbsp;&#93;&#93;</code>
                                     <button class="btn btn-xs btn-default snippets-tstr-copy"
                                             data-clipboard-text="[[ <?= rex_escape($string->getKey()) ?> ]]"
                                             title="<?= rex_i18n::msg('snippets_btn_copy_shortcode') ?>">
