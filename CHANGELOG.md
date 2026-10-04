@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1] - 2026-10-04
+
+### Behoben
+
+- **Übersetzungen, Schlüssel-Spalte:** Lange Platzhalter ragten aus der Spalte; der Kopier-Knopf lag dadurch über dem Text der Nachbarspalte. Der Platzhalter bricht jetzt innerhalb der Spalte um – an Punkten und Unterstrichen statt mitten im Wort, die Klammern `[[ ]]` bleiben am Schlüssel. Kopier-Knopf und Kategorie-Symbol behalten ihre Größe; die Spalte ist etwas breiter.
+
 ## [1.5.0] - 2026-10-03
 
 ### Hinzugefügt

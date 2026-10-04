@@ -352,7 +352,7 @@
                 if (data && data.success) {
                     // Code + Copy-Button aktualisieren
                     var $code = $td.find('.snippets-tstr-placeholder');
-                    $code.html('&#91;&#91; ' + $('<span>').text(newKey).html() + ' &#93;&#93;');
+                    $code.html('&#91;&#91;&nbsp;' + $('<span>').text(newKey).html().replace(/([._])/g, '$1<wbr>') + '&nbsp;&#93;&#93;');
                     $code.attr('data-key', newKey);
                     $td.find('.snippets-tstr-copy').attr('data-clipboard-text', '[[ ' + newKey + ' ]]');
                     $input.attr('data-original', newKey);
