@@ -89,10 +89,11 @@ class ReplacementService
                 continue;
             }
 
-            // Context-Check
+            // Context-Check: im Frontend unsichtbar machen, im Backend als Text stehen lassen
+            // (dort steht ein Frontend-Snippet z. B. in Hilfetexten, Doku oder Vorschauen)
             $snippetContext = $snippet->getContext();
             if ('both' !== $snippetContext && $snippetContext !== $currentContext) {
-                $replacements[$fullMatch] = '';
+                $replacements[$fullMatch] = 'backend' === $currentContext ? $fullMatch : '';
                 continue;
             }
 
@@ -125,7 +126,38 @@ class ReplacementService
         }
 
         // OPTIMIERUNG: strtr() ist schneller als mehrere str_replace()
-        return strtr($content, $replacements);
+        return self::applyOutsideCode($content, $replacements);
+    }
+
+    /**
+     * Ersetzt nur außerhalb von <code>, <pre> und <textarea>: Dort sind Platzhalter als Text gemeint
+     * (Dokumentation, Hilfetexte, Eingabefelder) und dürfen nicht ausgeführt oder entfernt werden.
+     *
+     * @param array<string, string> $replacements
+     */
+    public static function applyOutsideCode(string $content, array $replacements): string
+    {
+        if ([] === $replacements) {
+            return $content;
+        }
+        if (false === stripos($content, '<code') && false === stripos($content, '<pre') && false === stripos($content, '<textarea')) {
+            return strtr($content, $replacements);
+        }
+        $parts = preg_split('~(<(code|pre|textarea)\b[^>]*>.*?</\2\s*>)~is', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if (false === $parts) {
+            return strtr($content, $replacements);
+        }
+        $out = '';
+        // preg_split mit zwei Gruppen: [Text, ganzer Block, Tagname, Text, ganzer Block, Tagname, …]
+        for ($i = 0, $n = count($parts); $i < $n; ++$i) {
+            $mod = $i % 3;
+            if (0 === $mod) {
+                $out .= strtr($parts[$i], $replacements);
+            } elseif (1 === $mod) {
+                $out .= $parts[$i];
+            }
+        }
+        return $out;
     }
 
     /**

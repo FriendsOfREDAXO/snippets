@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2] - 2026-11-10
+
+### Behoben
+
+- **Platzhalter verschwanden im Backend:** Snippets, die nur fürs Frontend gelten, wurden im Backend durch einen leeren Text ersetzt – auch in Hilfetexten, Dokumentation und Vorschauen, die `[[snippet:…]]` erklären. Im Backend bleibt ein solcher Platzhalter jetzt als Text stehen; im Frontend wird ein Snippet für einen anderen Kontext weiterhin ausgeblendet.
+- **Keine Ersetzung in `<code>`, `<pre>` und `<textarea>`:** Dort sind Platzhalter als Text gemeint (Anleitungen, Code-Beispiele, Eingabefelder) und werden nicht mehr ausgeführt oder entfernt – im Backend wie im Frontend.
+
 ## [1.5.1] - 2026-10-04
 
 ### Behoben
