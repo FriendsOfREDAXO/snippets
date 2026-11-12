@@ -65,6 +65,36 @@ class UsageService
     }
 
     /**
+     * Darf der aktuelle Benutzer die Fundstelle öffnen? Sonst würde REDAXO ihn auf seine Startseite umleiten,
+     * z. B. Redakteure ohne Admin-Rechte bei Templates und Modulen.
+     *
+     * @param array{type: string, id: int, clang_id: int, name: string, url: string} $usage
+     */
+    public static function canOpen(array $usage): bool
+    {
+        $user = \rex::getUser();
+        if (null === $user) {
+            return false;
+        }
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ('article' === $usage['type']) {
+            $page = \rex_be_controller::getPageObject('content/edit');
+            $article = \rex_article::get($usage['id'], $usage['clang_id']);
+            if (null === $page || null === $article || !$page->checkPermission($user)) {
+                return false;
+            }
+            return $user->getComplexPerm('structure')->hasCategoryPerm($article->getCategoryId())
+                && $user->getComplexPerm('clang')->hasPerm($usage['clang_id']);
+        }
+
+        $page = \rex_be_controller::getPageObject('template' === $usage['type'] ? 'templates' : 'modules/modules');
+        return null !== $page && $page->checkPermission($user);
+    }
+
+    /**
      * @param callable(string, array{type: string, id: int, clang_id: int, name: string, url: string}): void $add
      */
     private static function scanSlices(callable $add): void
