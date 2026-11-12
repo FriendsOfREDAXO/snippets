@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.3] - 2026-11-12
+
+### Behoben
+
+- **Redakteure konnten Snippets nicht bearbeiten:** Die Seite „Snippet bearbeiten“ verlangte das Recht `snippets[admin|editor]`. REDAXO trennt die Rechte einer Rolle am `|`, deshalb passte dieses Recht nie: Jeder Nicht-Admin wurde beim Klick auf „Bearbeiten“ oder „Neues Snippet“ auf seine Startseite umgeleitet, auch mit den Rechten „Snippets bearbeiten“ oder „Administrator“ des Addons. Die Seite verlangt jetzt `snippets[]`. Wer bearbeiten darf, prüft die Seite selbst wie bisher (`PermissionService::canEdit()`: `snippets[editor]` oder `snippets[admin]`); PHP-Snippets bleiben Admins vorbehalten.
+
 ## [1.5.2] - 2026-11-10
 
 ### Behoben

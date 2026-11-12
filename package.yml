@@ -1,5 +1,5 @@
 package: snippets
-version: '1.5.2'
+version: '1.5.3'
 author: REDAXO Community
 supportpage: https://github.com/FriendsOfREDAXO/snippets
 
@@ -19,7 +19,7 @@ page:
         edit:
             title: 'translate:snippets_edit'
             icon: rex-icon fa-pencil
-            perm: snippets[admin|editor]
+            perm: snippets[]
             hidden: true
         html_replacement:
             title: 'translate:snippets_html_replacements'
