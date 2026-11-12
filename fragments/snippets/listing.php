@@ -233,7 +233,7 @@ $colspan = $can_edit ? 7 : 6;
                                 <ul class="list-unstyled snippets-usage-list">
                                     <?php foreach ($snippetUsages as $usage): ?>
                                     <li>
-                                        <a href="<?= $usage['url'] ?>"><?= rex_escape($usage['name']) ?></a>
+                                        <?php if (\FriendsOfREDAXO\Snippets\Service\UsageService::canOpen($usage)): ?><a href="<?= $usage['url'] ?>"><?= rex_escape($usage['name']) ?></a><?php else: ?><span><?= rex_escape($usage['name']) ?></span><?php endif; ?>
                                         <small class="text-muted snippets-meta">
                                             <?= rex_i18n::msg('snippets_usage_type_' . $usage['type']) ?><?php if ($isMultiClang && $usage['clang_id'] > 0 && null !== rex_clang::get($usage['clang_id'])): ?> · <?= rex_escape(rex_clang::get($usage['clang_id'])->getName()) ?><?php endif; ?>
                                         </small>

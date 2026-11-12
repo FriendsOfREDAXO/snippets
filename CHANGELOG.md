@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.4] - 2026-11-12
+
+### Behoben
+
+- **Fundstellen führten Redakteure auf die Startseite:** In der Übersicht und beim Bearbeiten verlinkt „Fundstellen“ Templates und Module auf ihre Bearbeiten-Seite. Ohne Admin-Rechte leitete REDAXO dort auf die Startseite um. Fundstellen, die der Benutzer nicht öffnen darf, erscheinen jetzt als Name ohne Link. Geprüft werden das Seitenrecht und bei Artikeln zusätzlich die Rechte für Kategorie und Sprache. Admins sehen alles verlinkt wie bisher.
+
 ## [1.5.3] - 2026-11-12
 
 ### Behoben
